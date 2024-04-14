@@ -1,3 +1,3 @@
-module ars2024_project
+module go.mod
 
-go 1.22.0
+go 1.22.2

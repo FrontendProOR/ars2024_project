@@ -1,4 +1,4 @@
-package ars2024_project
+package main
 
 import (
 	"fmt"
