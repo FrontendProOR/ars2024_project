@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"errors"
-	"fmt"
 	"project/model"
 )
 
@@ -10,35 +9,34 @@ type ConfigInMemRepository struct {
 	configs map[string]model.Config
 }
 
-// todo: dodaj implementaciju metoda iz interfejsa ConfigRepository
-
 func NewConfigInMemRepository() model.ConfigRepository {
 	return &ConfigInMemRepository{
 		configs: make(map[string]model.Config),
 	}
 }
 
-// Add implements model.ConfigRepository.
-func (c ConfigInMemRepository) Add(config model.Config) {
-	key := fmt.Sprintf("%s/%d", config.Name, config.Version)
-	c.configs[key] = config
+func (r *ConfigInMemRepository) Add(config model.Config) error {
+	// Provera da li konfiguracija već postoji i vraćanje greške ako je imutabilnost pravilo
+	if _, exists := r.configs[config.Name]; exists {
+		return errors.New("config is immutable and cannot be modified")
+	}
+	r.configs[config.Name] = config
+	return nil
 }
 
-// Get implements model.ConfigRepository.
-func (c ConfigInMemRepository) Get(name string, version int) (model.Config, error) {
-	key := fmt.Sprintf("%s/%d", name, version)
-	config, ok := c.configs[key]
+func (repo ConfigInMemRepository) Get(name string, version int) (model.Config, error) {
+	config, ok := repo.configs[name]
 	if !ok {
 		return model.Config{}, errors.New("config not found")
 	}
 	return config, nil
 }
 
-func (c ConfigInMemRepository) Delete(name string, version int) error {
-	key := fmt.Sprintf("%s/%d", name, version)
-	if _, ok := c.configs[key]; !ok {
+func (repo ConfigInMemRepository) Delete(name string, version int) error {
+	_, ok := repo.configs[name]
+	if !ok {
 		return errors.New("config not found")
 	}
-	delete(c.configs, key)
+	delete(repo.configs, name)
 	return nil
 }

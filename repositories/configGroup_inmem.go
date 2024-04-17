@@ -2,42 +2,47 @@ package repositories
 
 import (
 	"errors"
-	"fmt"
 	"project/model"
 )
 
 type ConfigGroupInMemRepository struct {
-	configs map[string]model.ConfigGroup
+	configGroups map[string]model.ConfigGroup
 }
 
 func NewConfigGroupInMemRepository() model.ConfigGroupRepository {
-	return ConfigGroupInMemRepository{
-		configs: make(map[string]model.ConfigGroup),
+	return &ConfigGroupInMemRepository{
+		configGroups: make(map[string]model.ConfigGroup),
 	}
 }
 
-func (c ConfigGroupInMemRepository) Add(config model.ConfigGroup) {
-	key := fmt.Sprintf("%s/%d", config.Name, config.Version)
-	c.configs[key] = config
+func (repo *ConfigGroupInMemRepository) Add(configGroup model.ConfigGroup) error {
+	repo.configGroups[configGroup.Name] = configGroup
+	return nil
 }
 
-func (c ConfigGroupInMemRepository) Get(name string, version int) (model.ConfigGroup, error) {
-	key := fmt.Sprintf("%s/%d", name, version)
-	config, ok := c.configs[key]
-	if !ok {
-		return model.ConfigGroup{}, errors.New("config not found")
+func (repo *ConfigGroupInMemRepository) Get(name string, version int) (model.ConfigGroup, error) {
+	configGroup, exists := repo.configGroups[name]
+	if !exists {
+		return model.ConfigGroup{}, errors.New("config group not found")
 	}
-	return config, nil
+	return configGroup, nil
 }
 
-func (c ConfigGroupInMemRepository) Delete(name string, version int) error {
-	key := fmt.Sprintf("%s/%d", name, version)
-
-	if _, ok := c.configs[key]; !ok {
-		return errors.New("config not found")
+func (repo *ConfigGroupInMemRepository) Delete(name string, version int) error {
+	if _, exists := repo.configGroups[name]; !exists {
+		return errors.New("config group not found")
 	}
+	delete(repo.configGroups, name)
+	return nil
+}
 
-	delete(c.configs, key)
+// Ove metode (AddConfigToGroup i RemoveConfigFromGroup) su primeri i mogu zahtevati dodatnu implementaciju
+func (repo *ConfigGroupInMemRepository) AddConfigToGroup(groupName string, version int, config model.ConfigWithLabels) error {
+	// Implementacija dodavanja konfiguracije u grupu
+	return nil
+}
 
+func (repo *ConfigGroupInMemRepository) RemoveConfigFromGroup(groupName string, version int, configName string) error {
+	// Implementacija uklanjanja konfiguracije iz grupe
 	return nil
 }

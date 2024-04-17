@@ -7,7 +7,7 @@ type Config struct {
 }
 
 type ConfigRepository interface {
+	Add(config Config) error
 	Get(name string, version int) (Config, error)
-	Add(config Config)
 	Delete(name string, version int) error
 }
