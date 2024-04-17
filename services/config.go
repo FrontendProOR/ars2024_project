@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"project/model"
 )
 
@@ -15,30 +14,18 @@ func NewConfigService(repo model.ConfigRepository) ConfigService {
 	}
 }
 
-func (s ConfigService) Hello() {
-	fmt.Println("hello from config service")
+func (s ConfigService) Get(name string, version int) (model.Config, error) {
+	return s.repo.Get(name, version)
 }
 
-func (s ConfigService) AddConfig(config model.Config) error {
-	return s.repo.AddConfig(config)
+func (s ConfigService) Add(config model.Config) {
+	s.repo.Add(config)
 }
 
-func (s ConfigService) GetConfig(id string) (model.Config, error) {
-	return s.repo.GetConfig(id)
-}
-
-func (s ConfigService) DeleteConfig(id string) error {
-	return s.repo.DeleteConfig(id)
-}
-
-func (s ConfigService) AddConfigGroup(group model.ConfigGroup) error {
-	return s.repo.AddConfigGroup(group)
-}
-
-func (s ConfigService) GetConfigGroup(id string) (model.ConfigGroup, error) {
-	return s.repo.GetConfigGroup(id)
-}
-
-func (s ConfigService) DeleteConfigGroup(id string) error {
-	return s.repo.DeleteConfigGroup(id)
+func (s ConfigService) Delete(name string, version int) error {
+	err := s.repo.Delete(name, version)
+	if err != nil {
+		return err
+	}
+	return nil
 }
