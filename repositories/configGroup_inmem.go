@@ -50,25 +50,32 @@ func (repo *ConfigGroupInMemRepository) Delete(name string, version int) error {
 
 // Ove metode (AddConfigToGroup i RemoveConfigFromGroup) su primeri i mogu zahtevati dodatnu implementaciju
 func (repo *ConfigGroupInMemRepository) AddConfigToGroup(groupName string, version int, config model.ConfigWithLabels) error {
-	// Implementacija dodavanja konfiguracije u grupu
 	group, err := repo.Get(groupName, version)
 	if err != nil {
 		return err
 	}
-	// Dodavanje konfiguracije u grupu
-	group.Configs[config.Name] = &config
+	// Provera da li konfiguracija već postoji
+	for _, existingConfig := range group.Configs {
+		if existingConfig.Name == config.Name {
+			return errors.New("config already exists")
+		}
+	}
+	// Dodavanje nove konfiguracije u listu
+	group.Configs = append(group.Configs, &config)
 	// Ažuriranje grupe
 	return repo.Add(group)
 }
 
-func (repo *ConfigGroupInMemRepository) RemoveConfigFromGroup(groupName string, version int, configName string) error {
-	// Implementacija uklanjanja konfiguracije iz grupe
-	group, err := repo.Get(groupName, version)
+func (repo *ConfigGroupInMemRepository) RemoveConfigFromGroup(groupName string, groupVersion int, configName string, configVersion int) error {
+	group, err := repo.Get(groupName, groupVersion)
 	if err != nil {
 		return err
 	}
-	// Uklanjanje konfiguracije iz grupe
-	delete(group.Configs, configName)
-	// Ažuriranje grupe
-	return repo.Add(group)
+	for i, config := range group.Configs {
+		if config.Name == configName && config.Version == configVersion {
+			group.Configs = append(group.Configs[:i], group.Configs[i+1:]...)
+			return repo.Add(group)
+		}
+	}
+	return errors.New("config not found")
 }

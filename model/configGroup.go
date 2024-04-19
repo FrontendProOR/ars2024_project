@@ -6,9 +6,9 @@ type ConfigWithLabels struct {
 }
 
 type ConfigGroup struct {
-	Name    string                       `json:"name"`
-	Version int                          `json:"version"`
-	Configs map[string]*ConfigWithLabels `json:"configs"`
+	Name    string              `json:"name"`
+	Version int                 `json:"version"`
+	Configs []*ConfigWithLabels `json:"configs"`
 }
 
 type ConfigGroupRepository interface {
@@ -16,5 +16,5 @@ type ConfigGroupRepository interface {
 	Get(name string, version int) (ConfigGroup, error)
 	Delete(name string, version int) error
 	AddConfigToGroup(groupName string, version int, config ConfigWithLabels) error
-	RemoveConfigFromGroup(groupName string, version int, configName string) error
+	RemoveConfigFromGroup(groupName string, version int, configName string, configVersion int) error
 }
