@@ -34,6 +34,7 @@ func (h *ConfigGroupHandler) AddGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("Config group successfully added"))
 }
 
 // Pregled konfiguracione grupe
@@ -75,7 +76,8 @@ func (h *ConfigGroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Config group successfully deleted"))
 }
 
 // Dodavanje konfiguracije u grupu
@@ -99,6 +101,7 @@ func (h *ConfigGroupHandler) AddConfigToGroup(w http.ResponseWriter, r *http.Req
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("Config successfully added to group"))
 }
 
 // Uklanjanje konfiguracije iz grupe
@@ -121,5 +124,6 @@ func (h *ConfigGroupHandler) RemoveConfigFromGroup(w http.ResponseWriter, r *htt
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Config successfully removed from group"))
 }

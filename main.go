@@ -1,10 +1,16 @@
 package main
 
 import (
+	"context"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"project/handlers"
 	"project/repositories"
 	"project/services"
+	"syscall"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -35,6 +41,30 @@ func main() {
 	router.HandleFunc("/config-groups/{name}/{version}/add-config", configGroupHandler.AddConfigToGroup).Methods("POST")
 	router.HandleFunc("/config-groups/{name}/{version}/configs/{configName}/{configVersion}", configGroupHandler.RemoveConfigFromGroup).Methods("DELETE")
 
-	// Pokretanje HTTP servera
-	http.ListenAndServe("0.0.0.0:8000", router)
+	server := &http.Server{
+		Addr:    "0.0.0.0:8000",
+		Handler: router,
+	}
+
+	// Pokretanje HTTP servera u gorutini kako bi se moglo osluškivati za shutdown signal
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("ListenAndServe error: %v", err)
+		}
+	}()
+
+	// Osluškivanje za SIGINT i SIGTERM za Graceful Shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Server is shutting down...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("Server forced to shutdown: %v", err)
+	}
+
+	log.Println("Server exited gracefully")
 }

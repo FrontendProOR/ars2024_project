@@ -34,6 +34,7 @@ func (c ConfigHandler) Add(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("Config successfully added"))
 }
 
 // Pregled konfiguracije po imenu i verziji
@@ -77,5 +78,6 @@ func (c ConfigHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Config successfully deleted"))
 }
