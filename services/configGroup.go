@@ -32,11 +32,11 @@ func (s ConfigGroupService) Delete(name string, version int) error {
 	return nil
 }
 
-func (s ConfigGroupService) AddConfigToGroup(groupName string, version int, config model.ConfigWithLabels) error {
+func (s ConfigGroupService) AddConfigToGroup(groupName string, version int, configName string, configVersion int) error {
 	// Implementacija bi uključivala dobijanje postojeće grupe,
 	// dodavanje konfiguracije u grupu, i ažuriranje grupe u repozitorijumu.
 	// Ovo zahteva dodatnu logiku i možda izmene u model.ConfigGroupRepository interfejsu.
-	return s.repo.AddConfigToGroup(groupName, version, config)
+	return s.repo.AddConfigToGroup(groupName, version, configName, configVersion)
 }
 
 func (s ConfigGroupService) RemoveConfigFromGroup(groupName string, groupVersion int, configName string, configVersion int) error {

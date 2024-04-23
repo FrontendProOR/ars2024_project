@@ -22,7 +22,7 @@ func main() {
 	configHandler := handlers.NewConfigHandler(configService)
 
 	// Inicijalizacija repozitorijuma, servisa i handlera za ConfigGroup
-	configGroupRepo := repositories.NewConfigGroupInMemRepository() // Pretpostavka da postoji ovaj repozitorijum
+	configGroupRepo := repositories.NewConfigGroupInMemRepository(configRepo) // Pretpostavka da postoji ovaj repozitorijum
 	configGroupService := services.NewConfigGroupService(configGroupRepo)
 	configGroupHandler := handlers.NewConfigGroupHandler(configGroupService)
 
@@ -35,11 +35,11 @@ func main() {
 	router.HandleFunc("/configs/{name}/{version}", configHandler.Delete).Methods("DELETE") // Ruta za brisanje konfiguracije po imenu i verziji
 
 	// Registracija ruta za ConfigGroupHandler
-	router.HandleFunc("/config-groups", configGroupHandler.AddGroup).Methods("POST")                       // Ruta za dodavanje konfiguracione grupe
-	router.HandleFunc("/config-groups/{name}/{version}", configGroupHandler.GetGroup).Methods("GET")       // Ruta za pregled konfiguracione grupe po imenu i verziji
-	router.HandleFunc("/config-groups/{name}/{version}", configGroupHandler.DeleteGroup).Methods("DELETE") // Ruta za brisanje konfiguracione grupe po imenu i verziji
-	router.HandleFunc("/config-groups/{name}/{version}/add-config", configGroupHandler.AddConfigToGroup).Methods("POST")
-	router.HandleFunc("/config-groups/{name}/{version}/configs/{configName}/{configVersion}", configGroupHandler.RemoveConfigFromGroup).Methods("DELETE")
+	router.HandleFunc("/config-groups", configGroupHandler.AddGroup).Methods("POST")                                                              // Ruta za dodavanje konfiguracione grupe
+	router.HandleFunc("/config-groups/{name}/{version}", configGroupHandler.GetGroup).Methods("GET")                                              // Ruta za pregled konfiguracione grupe po imenu i verziji
+	router.HandleFunc("/config-groups/{name}/{version}", configGroupHandler.DeleteGroup).Methods("DELETE")                                        // Ruta za brisanje konfiguracione grupe po imenu i verziji
+	router.HandleFunc("/config-groups/{name}/{version}/{configName}/{configVersion}", configGroupHandler.AddConfigToGroup).Methods("POST")        // Ruta za dodavanje postojeće konfiguracije u grupu
+	router.HandleFunc("/config-groups/{name}/{version}/{configName}/{configVersion}", configGroupHandler.RemoveConfigFromGroup).Methods("DELETE") // Ruta za uklanjanje konfiguracije iz grupe
 
 	server := &http.Server{
 		Addr:    "0.0.0.0:8000",

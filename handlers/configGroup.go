@@ -89,13 +89,14 @@ func (h *ConfigGroupHandler) AddConfigToGroup(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	var config model.ConfigWithLabels
-	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	configName := mux.Vars(r)["configName"]
+	configVersion, err := strconv.Atoi(mux.Vars(r)["configVersion"])
+	if err != nil {
+		http.Error(w, "Invalid config version format", http.StatusBadRequest)
 		return
 	}
 
-	if err := h.repo.AddConfigToGroup(groupName, version, config); err != nil {
+	if err := h.repo.AddConfigToGroup(groupName, version, configName, configVersion); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -15,6 +15,6 @@ type ConfigGroupRepository interface {
 	Add(configGroup ConfigGroup) error
 	Get(name string, version int) (ConfigGroup, error)
 	Delete(name string, version int) error
-	AddConfigToGroup(groupName string, version int, config ConfigWithLabels) error
+	AddConfigToGroup(groupName string, version int, configName string, configVersion int) error
 	RemoveConfigFromGroup(groupName string, version int, configName string, configVersion int) error
 }

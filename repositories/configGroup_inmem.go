@@ -7,11 +7,13 @@ import (
 
 type ConfigGroupInMemRepository struct {
 	configGroups map[string]map[int]model.ConfigGroup
+	configRepo   model.ConfigRepository
 }
 
-func NewConfigGroupInMemRepository() model.ConfigGroupRepository {
+func NewConfigGroupInMemRepository(configRepo model.ConfigRepository) *ConfigGroupInMemRepository {
 	return &ConfigGroupInMemRepository{
 		configGroups: make(map[string]map[int]model.ConfigGroup),
+		configRepo:   configRepo,
 	}
 }
 
@@ -49,19 +51,30 @@ func (repo *ConfigGroupInMemRepository) Delete(name string, version int) error {
 }
 
 // Ove metode (AddConfigToGroup i RemoveConfigFromGroup) su primeri i mogu zahtevati dodatnu implementaciju
-func (repo *ConfigGroupInMemRepository) AddConfigToGroup(groupName string, version int, config model.ConfigWithLabels) error {
+func (repo *ConfigGroupInMemRepository) AddConfigToGroup(groupName string, version int, configName string, configVersion int) error {
 	group, err := repo.Get(groupName, version)
 	if err != nil {
 		return err
 	}
-	// Provera da li konfiguracija već postoji
-	for _, existingConfig := range group.Configs {
-		if existingConfig.Name == config.Name {
-			return errors.New("config already exists")
+	// Provera da li konfiguracija već postoji pomoću imena i verzije
+	for _, config := range group.Configs {
+		if config.Name == configName && config.Version == configVersion {
+			return errors.New("config already exists in group")
 		}
 	}
+	config, err := repo.configRepo.Get(configName, configVersion)
+	if err != nil {
+		return err
+	}
 	// Dodavanje nove konfiguracije u listu
-	group.Configs = append(group.Configs, &config)
+	group.Configs = append(group.Configs, &model.ConfigWithLabels{
+		Config: model.Config{
+			Name:    configName,
+			Version: config.Version,
+			Params:  config.Params,
+		},
+		Labels: make(map[string]string),
+	})
 	// Ažuriranje grupe
 	return repo.Add(group)
 }
