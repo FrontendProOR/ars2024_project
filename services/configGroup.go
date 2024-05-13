@@ -42,3 +42,19 @@ func (s ConfigGroupService) AddConfigToGroup(groupName string, version int, conf
 func (s ConfigGroupService) RemoveConfigFromGroup(groupName string, groupVersion int, configName string, configVersion int) error {
 	return s.repo.RemoveConfigFromGroup(groupName, groupVersion, configName, configVersion)
 }
+
+func (s ConfigGroupService) GetConfigsByLabels(groupName string, versionInt int, labels map[string]string) (model.Config, error) {
+	configs, err := s.repo.GetConfigsByLabels(groupName, versionInt, labels)
+	if err != nil {
+		return model.Config{}, err // it returns empty config in case of error
+	}
+	return configs, nil
+}
+
+func (s ConfigGroupService) RemoveConfigsByLabels(groupName string, versionInt int, labels map[string]string) error {
+	err := s.repo.RemoveConfigsByLabels(groupName, versionInt, labels)
+	if err != nil {
+		return err
+	}
+	return nil
+}

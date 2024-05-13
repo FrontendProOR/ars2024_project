@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"project/model"
 	"project/services"
@@ -127,4 +128,95 @@ func (h *ConfigGroupHandler) RemoveConfigFromGroup(w http.ResponseWriter, r *htt
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Config successfully removed from group"))
+}
+
+func decodeBodyLabels(body io.Reader) (map[string]string, error) {
+	var labels map[string]string
+	err := json.NewDecoder(body).Decode(&labels)
+	if err != nil {
+		return nil, err
+	}
+	return labels, nil
+}
+
+func renderJSON(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (h *ConfigGroupHandler) GetConfigsByLabels(w http.ResponseWriter, r *http.Request) {
+	// Extract name and version from request
+	name := mux.Vars(r)["name"]
+	version := mux.Vars(r)["version"]
+
+	// Convert version to int
+	versionInt, err := strconv.Atoi(version)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get the group based on name and version
+	group, err := h.repo.Get(name, versionInt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	// Decode labels from request body
+	labels, err := decodeBodyLabels(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get configs by labels
+	configs, err := h.repo.GetConfigsByLabels(group.Name, versionInt, labels)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Return the filtered configs as JSON response
+	renderJSON(w, configs)
+}
+
+func (h *ConfigGroupHandler) RemoveConfigsByLabels(w http.ResponseWriter, r *http.Request) {
+	// Extract name and version from request
+	name := mux.Vars(r)["name"]
+	version := mux.Vars(r)["version"]
+
+	// Convert version to int
+	versionInt, err := strconv.Atoi(version)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get the group based on name and version
+	group, err := h.repo.Get(name, versionInt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	// Decode labels from request body
+	labels, err := decodeBodyLabels(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Delete configs by labels
+	err = h.repo.RemoveConfigsByLabels(group.Name, versionInt, labels)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Return success message
+	renderJSON(w, "deleted")
 }

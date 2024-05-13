@@ -31,11 +31,8 @@ func main() {
 	// Kreiranje novog router-a
 	router := mux.NewRouter()
 
-	// 10 requests inistally
-	// refills at rate 10 req/min (1 req per 6 seconds)
+	// Inicijalizacija limitera koji će ograniciti broj poziva na rute jedan zahtev u 6 sekundi (10 zahteva u minuti)
 	limiter := rate.NewLimiter(0.167, 10)
-
-	// Use the RateLimitMiddleware from the middleware package
 
 	// Registracija ruta za ConfigHandler
 	router.Handle("/configs", middleware.RateLimit(limiter, configHandler.Add)).Methods("POST")                       // Ruta za dodavanje konfiguracije

@@ -17,6 +17,12 @@ func NewConfigGroupInMemRepository(configRepo model.ConfigRepository) *ConfigGro
 	}
 }
 
+// ConfigGroupRepository interface
+type ConfigGroupRepository interface {
+	GetConfigsByLabels(groupName string, labels map[string]string) ([]model.Config, error)
+	RemoveConfigsByLabels(groupName string, labels map[string]string) error
+}
+
 func (repo *ConfigGroupInMemRepository) Add(configGroup model.ConfigGroup) error {
 	if _, exists := repo.configGroups[configGroup.Name]; !exists {
 		repo.configGroups[configGroup.Name] = make(map[int]model.ConfigGroup)
@@ -91,4 +97,78 @@ func (repo *ConfigGroupInMemRepository) RemoveConfigFromGroup(groupName string, 
 		}
 	}
 	return errors.New("config not found")
+}
+
+// func (repo *ConfigGroupInMemRepository) GetConfigsByLabels(groupName string, version int, labels map[string]string) ([]model.Config, error) {
+// 	group, err := repo.Get(groupName, version)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	var filteredConfigs []model.Config
+
+// 	for _, conf := range group.Configs {
+// 		for keyConfig, valueConfig := range conf.Labels {
+// 			for keyLabel, valueLabel := range labels {
+// 				if keyConfig == keyLabel && valueConfig == valueLabel {
+// 					filteredConfigs = append(filteredConfigs, conf.Config)
+// 				}
+// 			}
+// 		}
+// 	}
+
+//		return filteredConfigs, nil
+//	}
+func (repo *ConfigGroupInMemRepository) GetConfigsByLabels(groupName string, version int, labels map[string]string) (model.Config, error) {
+	group, err := repo.Get(groupName, version)
+	if err != nil {
+		return model.Config{}, err
+	}
+
+	// Iterate over each configuration in the group
+	for _, conf := range group.Configs {
+		// Assume that a configuration matches the labels by default
+		matches := true
+		// Check if all labels provided match the labels of the current configuration
+		for key, value := range labels {
+			// If any label does not match, set matches to false and break the loop
+			if conf.Labels[key] != value {
+				matches = false
+				break
+			}
+		}
+		// If all labels match, return the configuration and nil error
+		if matches {
+			return conf.Config, nil
+		}
+	}
+
+	// Return an empty config and an error indicating that no matching config was found
+	return model.Config{}, errors.New("no matching config found")
+}
+
+func (repo *ConfigGroupInMemRepository) RemoveConfigsByLabels(groupName string, version int, labels map[string]string) error {
+	group, err := repo.Get(groupName, version)
+	if err != nil {
+		return err
+	}
+
+	for _, configWithLabels := range group.Configs {
+		for keyConfig, valueConfig := range configWithLabels.Labels {
+			for keyLabel, valueLabel := range labels {
+				if keyConfig == keyLabel && valueConfig == valueLabel {
+					// Check if the version of the configuration matches the provided version
+					if configWithLabels.Version != version {
+						return errors.New("config version does not match")
+					}
+					// If the version matches, proceed with deletion
+					if err := repo.configRepo.Delete(configWithLabels.Name, configWithLabels.Version); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }
