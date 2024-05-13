@@ -7,12 +7,14 @@ import (
 	"os"
 	"os/signal"
 	"project/handlers"
+	"project/middleware"
 	"project/repositories"
 	"project/services"
 	"syscall"
 	"time"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/time/rate"
 )
 
 func main() {
@@ -28,6 +30,12 @@ func main() {
 
 	// Kreiranje novog router-a
 	router := mux.NewRouter()
+
+	// Rate limiting 5 requests per second
+	rateLimiter := rate.NewLimiter(4, 1)
+
+	// Use the RateLimitMiddleware from the middleware package
+	router.Use(middleware.RateLimitMiddleware(rateLimiter))
 
 	// Registracija ruta za ConfigHandler
 	router.HandleFunc("/configs", configHandler.Add).Methods("POST")                       // Ruta za dodavanje konfiguracije
