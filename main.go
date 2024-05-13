@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"project/handlers"
-	"project/middleware"
+	"project/handlers/middleware"
 	"project/repositories"
 	"project/services"
 	"syscall"
@@ -31,23 +31,23 @@ func main() {
 	// Kreiranje novog router-a
 	router := mux.NewRouter()
 
-	// Rate limiting 5 requests per second
-	rateLimiter := rate.NewLimiter(4, 1)
+	// 10 requests inistally
+	// refills at rate 10 req/min (1 req per 6 seconds)
+	limiter := rate.NewLimiter(0.167, 10)
 
 	// Use the RateLimitMiddleware from the middleware package
-	router.Use(middleware.RateLimitMiddleware(rateLimiter))
 
 	// Registracija ruta za ConfigHandler
-	router.HandleFunc("/configs", configHandler.Add).Methods("POST")                       // Ruta za dodavanje konfiguracije
-	router.HandleFunc("/configs/{name}/{version}", configHandler.Get).Methods("GET")       // Ruta za pregled konfiguracije po imenu i verziji
-	router.HandleFunc("/configs/{name}/{version}", configHandler.Delete).Methods("DELETE") // Ruta za brisanje konfiguracije po imenu i verziji
+	router.Handle("/configs", middleware.RateLimit(limiter, configHandler.Add)).Methods("POST")                       // Ruta za dodavanje konfiguracije
+	router.Handle("/configs/{name}/{version}", middleware.RateLimit(limiter, configHandler.Get)).Methods("GET")       // Ruta za pregled konfiguracije po imenu i verziji
+	router.Handle("/configs/{name}/{version}", middleware.RateLimit(limiter, configHandler.Delete)).Methods("DELETE") // Ruta za brisanje konfiguracije po imenu i verziji
 
 	// Registracija ruta za ConfigGroupHandler
-	router.HandleFunc("/config-groups", configGroupHandler.AddGroup).Methods("POST")                                                              // Ruta za dodavanje konfiguracione grupe
-	router.HandleFunc("/config-groups/{name}/{version}", configGroupHandler.GetGroup).Methods("GET")                                              // Ruta za pregled konfiguracione grupe po imenu i verziji
-	router.HandleFunc("/config-groups/{name}/{version}", configGroupHandler.DeleteGroup).Methods("DELETE")                                        // Ruta za brisanje konfiguracione grupe po imenu i verziji
-	router.HandleFunc("/config-groups/{name}/{version}/{configName}/{configVersion}", configGroupHandler.AddConfigToGroup).Methods("POST")        // Ruta za dodavanje postojeće konfiguracije u grupu
-	router.HandleFunc("/config-groups/{name}/{version}/{configName}/{configVersion}", configGroupHandler.RemoveConfigFromGroup).Methods("DELETE") // Ruta za uklanjanje konfiguracije iz grupe
+	router.Handle("/config-groups/{name}/{version}", middleware.RateLimit(limiter, configGroupHandler.GetGroup)).Methods("GET")                                              // Ruta za pregled konfiguracione grupe po imenu i verziji
+	router.Handle("/config-groups", middleware.RateLimit(limiter, configGroupHandler.AddGroup)).Methods("POST")                                                              // Ruta za dodavanje konfiguracione grupe
+	router.Handle("/config-groups/{name}/{version}", middleware.RateLimit(limiter, configGroupHandler.DeleteGroup)).Methods("DELETE")                                        // Ruta za brisanje konfiguracione grupe po imenu i verziji
+	router.Handle("/config-groups/{name}/{version}/{configName}/{configVersion}", middleware.RateLimit(limiter, configGroupHandler.AddConfigToGroup)).Methods("POST")        // Ruta za dodavanje postojeće konfiguracije u grupu
+	router.Handle("/config-groups/{name}/{version}/{configName}/{configVersion}", middleware.RateLimit(limiter, configGroupHandler.RemoveConfigFromGroup)).Methods("DELETE") // Ruta za uklanjanje konfiguracije iz grupe
 
 	server := &http.Server{
 		Addr:    "0.0.0.0:8000",
