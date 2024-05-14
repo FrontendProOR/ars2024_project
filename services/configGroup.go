@@ -13,18 +13,14 @@ func NewConfigGroupService(repo model.ConfigGroupRepository) ConfigGroupService 
 }
 
 func (s ConfigGroupService) Add(group model.ConfigGroup) error {
-	// Provera validnosti ConfigGroup objekta
-	// Na primer, provera da li grupa već postoji, da li su svi potrebni podaci prisutni itd.
-
-	// Dodavanje grupe u repozitorijum
 	return s.repo.Add(group)
 }
 
-func (s ConfigGroupService) Get(name string, version int) (model.ConfigGroup, error) {
+func (s ConfigGroupService) Get(name string, version string) (model.ConfigGroup, error) {
 	return s.repo.Get(name, version)
 }
 
-func (s ConfigGroupService) Delete(name string, version int) error {
+func (s ConfigGroupService) Delete(name string, version string) error {
 	err := s.repo.Delete(name, version)
 	if err != nil {
 		return err
@@ -32,13 +28,26 @@ func (s ConfigGroupService) Delete(name string, version int) error {
 	return nil
 }
 
-func (s ConfigGroupService) AddConfigToGroup(groupName string, version int, configName string, configVersion int) error {
-	// Implementacija bi uključivala dobijanje postojeće grupe,
-	// dodavanje konfiguracije u grupu, i ažuriranje grupe u repozitorijumu.
-	// Ovo zahteva dodatnu logiku i možda izmene u model.ConfigGroupRepository interfejsu.
+func (s ConfigGroupService) AddConfigToGroup(groupName string, version string, configName string, configVersion string) error {
 	return s.repo.AddConfigToGroup(groupName, version, configName, configVersion)
 }
 
-func (s ConfigGroupService) RemoveConfigFromGroup(groupName string, groupVersion int, configName string, configVersion int) error {
-	return s.repo.RemoveConfigFromGroup(groupName, groupVersion, configName, configVersion)
+func (s ConfigGroupService) RemoveConfigFromGroup(groupName string, version string, configName string, configVersion string) error {
+	return s.repo.RemoveConfigFromGroup(groupName, version, configName, configVersion)
+}
+
+func (s ConfigGroupService) AddConfigWithLabelToGroup(groupName string, version string, config model.ConfigWithLabels) error {
+	return s.repo.AddConfigWithLabelToGroup(groupName, version, config)
+}
+
+func (s ConfigGroupService) RemoveConfigWithLabelFromGroup(groupName string, version string, configName string, configVersion string, label model.Label) error {
+	return s.repo.RemoveConfigWithLabelFromGroup(groupName, version, configName, configVersion, label)
+}
+
+func (s ConfigGroupService) RemoveConfigsWithLabelsFromGroup(groupName string, version string, labels []model.Label) error {
+	return s.repo.RemoveConfigsWithLabelsFromGroup(groupName, version, labels)
+}
+
+func (s ConfigGroupService) SearchConfigsWithLabelsInGroup(groupName string, version string, labels []model.Label) ([]*model.ConfigWithLabels, error) {
+	return s.repo.SearchConfigsWithLabelsInGroup(groupName, version, labels)
 }

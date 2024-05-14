@@ -18,11 +18,11 @@ func (s ConfigService) Add(config model.Config) error {
 	return s.repo.Add(config)
 }
 
-func (s ConfigService) Get(name string, version int) (model.Config, error) {
+func (s ConfigService) Get(name string, version string) (model.Config, error) {
 	return s.repo.Get(name, version)
 }
 
-func (s ConfigService) Delete(name string, version int) error {
+func (s ConfigService) Delete(name string, version string) error {
 	err := s.repo.Delete(name, version)
 	if err != nil {
 		return err

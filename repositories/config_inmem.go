@@ -6,20 +6,19 @@ import (
 )
 
 type ConfigInMemRepository struct {
-	configs map[string]map[int]model.Config
+	configs map[string]map[string]model.Config
 }
 
 func NewConfigInMemRepository() model.ConfigRepository {
 	return &ConfigInMemRepository{
-		configs: make(map[string]map[int]model.Config),
+		configs: make(map[string]map[string]model.Config),
 	}
 }
 
 func (r *ConfigInMemRepository) Add(config model.Config) error {
 	if _, exists := r.configs[config.Name]; !exists {
-		r.configs[config.Name] = make(map[int]model.Config)
+		r.configs[config.Name] = make(map[string]model.Config)
 	}
-	// Provera da li postoji verzija konfiguracije
 	if _, exists := r.configs[config.Name][config.Version]; exists {
 		return errors.New("config version already exists")
 	}
@@ -27,7 +26,7 @@ func (r *ConfigInMemRepository) Add(config model.Config) error {
 	return nil
 }
 
-func (repo *ConfigInMemRepository) Get(name string, version int) (model.Config, error) {
+func (repo *ConfigInMemRepository) Get(name string, version string) (model.Config, error) {
 	if versions, ok := repo.configs[name]; ok {
 		if config, exists := versions[version]; exists {
 			return config, nil
@@ -37,11 +36,10 @@ func (repo *ConfigInMemRepository) Get(name string, version int) (model.Config, 
 	return model.Config{}, errors.New("config not found")
 }
 
-func (repo *ConfigInMemRepository) Delete(name string, version int) error {
+func (repo *ConfigInMemRepository) Delete(name string, version string) error {
 	if versions, ok := repo.configs[name]; ok {
 		if _, exists := versions[version]; exists {
 			delete(versions, version)
-			// Ako nema više verzija, ukloni i ime
 			if len(versions) == 0 {
 				delete(repo.configs, name)
 			}

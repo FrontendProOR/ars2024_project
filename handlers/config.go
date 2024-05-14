@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"project/model"
 	"project/services"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -41,13 +40,8 @@ func (c ConfigHandler) Add(w http.ResponseWriter, r *http.Request) {
 func (c ConfigHandler) Get(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
-	versionInt, err := strconv.Atoi(version)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 
-	config, err := c.service.Get(name, versionInt)
+	config, err := c.service.Get(name, version)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -67,13 +61,8 @@ func (c ConfigHandler) Get(w http.ResponseWriter, r *http.Request) {
 func (c ConfigHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
-	versionInt, err := strconv.Atoi(version)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 
-	if err := c.service.Delete(name, versionInt); err != nil {
+	if err := c.service.Delete(name, version); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}

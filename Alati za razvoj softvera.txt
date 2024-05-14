@@ -1,0 +1,180 @@
+Alati za razvoj softvera
+
+Projektni zadatak
+
+Uvod
+
+> Broj članova u timu je 3
+> I pored timskog rada, bodovi su individualni — pravilno rasporedite posao
+> Svi članovi tima moraju slušati vežbe u istom terminu
+> Timove treba upisati u ovu tabelu do 25.3.2024.
+> Obavezno je navesti i link do repozitorijuma gde će se projekat nalaziti
+> Ako je repozitorijum private, potrebno je da asistentu date pristup projektu
+(username: tamararankovic)
+> Deo projekta brani se na vežbama kroz kontrolne tačke, ostatak u dogovorenim
+terminima odbrane
+
+Projektni zadatak
+
+Vaš zadatak je da implementirate sistem za centralizovanu konfiguraciju servisa
+> Sistem se sastoji od dve glavne komponente:
+	1. Web servis koji prihvata korisničke zahteve i vrši obradu
+	2. Baza podataka koja čuva stanje sistema
+
+> I dve pomoćne komponente koje održavaju sistem:
+	> Komponente za čuvanje i pregled logova i trace-a
+	> Komponente za čuvanje i pregled metrika
+> Web servis implementira se u programskom jeziku Go
+> Kao sistem za kontrolu verzija koristiti Git i pridržavati se GitFlow principa
+> Za interakciju sa web servisom koristiti Postman, cURL itd.
+
+Web servis – Model podataka
+
+> Konfiguracija se sastoji iz naziva, verzije i liste konfiguracionih parametara
+> Svaki konfiguracioni parametar je par ključ-vrednost, gde su i ključ i vrednost string
+> Konfiguraciona grupa predstavlja kolekciju više konfiguracija
+> Sastoji se iz naziva, verzije i liste konfiguracija
+> Svaka konfiguracija unutar grupe poseduje naziv, listu konfiguracionih parametara i
+listu labela
+> Svaka labela je par ključ-vrednost, gde su i ključ i vrednost string
+
+Web servis – Upravljanje konfiguracijom
+
+> Osnovne operacije koje sistem treba da podrži:
+	> Dodavanje konfiguracije u sistem, konfiguracija se prihvata kao JSOW podatak
+	> Pregled konfiguracije, konfiguracija se vraća po identifikatoru
+	> Brisanje konfiguracije, konfiguracija se briše po identifikatoru
+	> Dodavanje konfiguracione grupe, gde grupa može da ima 1 ili više konfiguracija,
+	  konfiguraciona grupa se prihvata kao JSOW podatak
+	> Pregled konfiguracione grupe, grupa se vraća po identifikatoru
+	> Brisanje konfiguracione grupa, grupa se briše po identifikatoru
+	> Izmena konfiguracione grupe, dodavanje konfiguracije u grupu
+	> Izmena konfiguracione grupe, uklanjanje konfiguracije iz grupe
+
+Web servis – Verzionisanje konfiguracije
+
+> Omogućiti verzioniranje, tako da konfiguracije možemo čuvati u različitim
+verzijama
+	> Kada klijent traži konfiguraciju, mora navesti naziv i verziju konfiguracije koju želi da dobije nazad
+	> Kada klijent traži konfiguracionu grupu, mora navesti naziv i verziju grupe koju želi da dobije nazad
+	> Podršku za verzije treba uključiti i u sve ostale operacije
+
+Web servis – Sistem labela
+
+> Napredne operacije koje se oslanjaju na sistem labela:
+	> Svaka konfiguracija unutar konfiguracione grupe treba da ima skup labela koje će biti
+	korišćene za filter (pretragu)
+	> Više konfiguracija unutar grupe mogu da imaju isti set labela
+	> Labele su teksutalni parovi u formatu ključ:vrednost razdvojeni ; (l1 : V1; l2 : V2, ...)
+	> Labele se za konfiguraciju definišu prilikom kreiranja grupe ili prilikom izmene grupe
+	kada dodajemo novu konfiguraciju u grupu
+	> Kada korisnik želi da vrati konfiguracije unutar konfiguracione grupe koristeći labele,
+	sve labele iz upita moraju se poklapati sa onima koje su pridružene konfiguraciji
+	> Podržati brisanje koristeći sistem labela, ista pravila važe kao i za pretragu
+
+Web servis – Imutabilnost ı idempotentnost zahteva
+
+> Omogućiti imutabilnost, tj. nema delimičnog menjanja konfiguracije —
+konfiguracija se može zameniti samo u potpunosti
+> Podržati da su zahtevi idempotentni
+> Kao jedinstvene identifikatore koristiti UUID
+
+Web servis – Ostali zahtevi
+
+> Servis treba da bude kontejnerizovan koristeći Docker — multi-stage build
+> Servis treba da ima implementiran graceful shutdown
+> Servis treba da radi rate limiting
+> API servisa potrebno je dokumentovati
+
+Baza podataka
+
+> Konfiguacije čuvati u NoSQL bazi Consul
+> Konfiguacione grupe čuvati u NoSQL bazi Consul
+> Čuvati informacije o idempotentnosti zahteva u NoSQL bazi Consul
+> Baza podataka treba da bude kontejnerizovana koristeći Docker
+
+Observability
+
+> Podržati tracing u vašem servisu
+> Za web servis treba beležiti sledeće metrike:
+	> Ukupan broj zahteva za prethodna 24 sata
+	> Broj uspešnih zahteva (status kodovi odgovora 2xx, 3xx) za prethodna 24 sata
+	> Broj neuspešnih zahteva (status kodovi odgovora 4xx, 5xx) za prethodna 24 sata
+	> Prosečno vreme izvršavanja zahteva za svaki endpoint
+	> Broj zahteva u jedinici vremena (minut ili sekund) za svaki endpoint za prethodna 24 sata
+
+Orkestracija
+
+> Sve elemente pokrenuti pomoću docker compose-a
+
+CI pipeline
+
+> Trigerovati CI sistem (GitHub Actions):
+	> Kada se napravi pull request na develop ili main granu, pokrenuti sve unit testove
+	> Kada se kod na develop ili main grani izmeni, pokrenuti sve unit testove. Ako su svi
+	testovi prošli, uraditi image build i push na Docker Hub
+
+Ocenjivanje
+
+> Za ocenu 6 potrebno je odraditi:
+	> Web API koji poštuje REST pravila i podržava:
+		> Osnovne operacije za upravljanje konfiguracijom i konfiguracionim grupama
+		> Verzionisanje konfiguracije
+	> Imutabilnost zahteva
+	> Graceful shutdown
+
+> Za ocenu 7 potrebno je odraditi:
+	> Sve za ocenu 6
+	> Web API koji poštuje REST pravila i podržava napredne operacije koje se oslanjaju
+	na sistem labela
+	> Rate limiting
+	> Kontejnerizacija web servisa
+
+> Za ocenu 8 potrebno je odraditi:
+	> Sve za ocenu 7
+	> Sve podatke čuvati u Consul bazi
+	> Kontejnerizacija Consul baze
+	> Orkestracija pomoću docker compose alata
+
+> Za ocenu 9 potrebno je odraditi:
+	> Sve za ocenu 8
+	> Idempotentnost zahteva
+	> Metrike
+	> Dokumentovati API
+
+> Za ocenu 10 potrebno je odraditi:
+	> Sve za ocenu 9
+	> Tracing
+	> CI pipeline
+
+Ocenjivanje – Pravila
+
+> To što su zahtevi navedeni prema ocenama ne znači da ćete sigurno tu ocenu imati
+na kraju, već je to najveća ocena koju možete imati, a tačna pravila su sledeća:
+	> Zahtevi za svaku ocenu nose po 10 bodova
+	> Kako bi se projekat pregledao za neku ocenu, za prethodnu ocenu treba da ste
+	ostvarili najmanje 7/10 bodova
+	> Kada saberete sve ostvarene bodove (+50), dobijate bodove na osnovu kojih vam se
+	određuje ocena
+	> Izuzetak je ocena 6, nije dovoljno da imate 1 bod, već barem 5 (pola ili više urađeno)
+> Napomena: Kako biste za određeni zahtev ostvarili bodove, članovi tima moraju
+pokazati razumevanje koncepata vezanih za zahtev i jasno znati da objasne svoju
+implementaciju
+
+Ostali zahtevi
+
+> Servis i baza podataka treba da budu kontejnerizovani koristeći Docker
+> Sve elemente pokrenuti pomoću docker compose-a
+> Treba da imate graceful shutdown i rate limiting
+> Podržati tracing i metrike u vašem servisu
+> Koristiti CI sistem (GitHub Actions)
+> Dokumentovati API
+
+Napomene
+
+> Posto koristite druge tehnologije, od vas se očekuje da samostalno istražite
+kako se pomoću njih implementira web servis, kako podržati tracing,
+metrike, rate limiting, graceful shutdown, kako dokerizovati servis ı bazu,
+dokumentovati API itd.
+> Sva pravila ocenjivanja i termini polaganja su isti kao i kod prve varijante
+projekta
