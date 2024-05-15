@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"project/model"
 	"project/services"
 	"strings"
@@ -127,27 +126,35 @@ func (h *ConfigGroupHandler) AddConfigWithLabelToGroup(w http.ResponseWriter, r 
 	w.Write([]byte("Config with label successfully added to group"))
 }
 
-// Uklanjanje konfiguracije sa labelom iz grupe
-func (h *ConfigGroupHandler) RemoveConfigWithLabelFromGroup(w http.ResponseWriter, r *http.Request) {
+// Uklanjanje konfiguracija sa svim labelama iz grupe
+func (h *ConfigGroupHandler) RemoveConfigsWithLabelsFromGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
 	groupVersion := mux.Vars(r)["version"]
 
-	configName := mux.Vars(r)["configName"]
-	configVersion := mux.Vars(r)["configVersion"]
+	labelsParam := r.URL.Query().Get("labels")
 
-	var label model.Label
-	if err := json.NewDecoder(r.Body).Decode(&label); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	labelPairs := strings.Split(labelsParam, ";")
+
+	labels := make([]model.Label, 0, len(labelPairs))
+	for _, pair := range labelPairs {
+		if pair == "" {
+			continue
+		}
+		parts := strings.SplitN(pair, ":", 2)
+		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+			http.Error(w, "Invalid label format. Expected format is key:value", http.StatusBadRequest)
+			return
+		}
+		labels = append(labels, model.Label{Key: parts[0], Value: parts[1]})
 	}
 
-	if err := h.repo.RemoveConfigWithLabelFromGroup(groupName, groupVersion, configName, configVersion, label); err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+	if err := h.repo.RemoveConfigsWithLabelsFromGroup(groupName, groupVersion, labels); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Config with label successfully removed from group"))
+	w.Write([]byte("Configs with labels successfully removed from group"))
 }
 
 // Pretraga konfiguracije sa labelom unutar grupe
@@ -155,30 +162,21 @@ func (h *ConfigGroupHandler) SearchConfigsWithLabelsInGroup(w http.ResponseWrite
 	groupName := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
 
-	labelsParam, err := url.QueryUnescape(r.URL.Query().Get("labels"))
-	if err != nil {
-		http.Error(w, "Error unescaping labels: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
+	labelsParam := r.URL.Query().Get("labels")
 
 	labelPairs := strings.Split(labelsParam, ";")
-	// Print labelPairs
-	for _, pair := range labelPairs {
-		println(pair)
-	}
 
-	searchLabels := make([]model.Label, len(labelPairs))
-	for i, pair := range labelPairs {
+	searchLabels := make([]model.Label, 0, len(labelPairs))
+	for _, pair := range labelPairs {
 		if pair == "" {
 			continue
 		}
 		parts := strings.SplitN(pair, ":", 2)
-		if len(parts) >= 2 {
-			searchLabels[i] = model.Label{Key: parts[0], Value: parts[1]}
-		} else {
-			// Handle the error or continue with the loop
-			continue
+		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+			http.Error(w, "Invalid label format. Expected format is key:value", http.StatusBadRequest)
+			return
 		}
+		searchLabels = append(searchLabels, model.Label{Key: parts[0], Value: parts[1]})
 	}
 
 	configs, err := h.repo.SearchConfigsWithLabelsInGroup(groupName, version, searchLabels)

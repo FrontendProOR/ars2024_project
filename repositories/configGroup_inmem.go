@@ -21,6 +21,9 @@ func (repo *ConfigGroupInMemRepository) Add(configGroup model.ConfigGroup) error
 	if _, exists := repo.configGroups[configGroup.Name]; !exists {
 		repo.configGroups[configGroup.Name] = make(map[string]model.ConfigGroup)
 	}
+	if _, exists := repo.configGroups[configGroup.Name][configGroup.Version]; exists {
+		return errors.New("config group version already exists")
+	}
 	repo.configGroups[configGroup.Name][configGroup.Version] = configGroup
 	return nil
 }
@@ -106,38 +109,25 @@ func (repo *ConfigGroupInMemRepository) AddConfigWithLabelToGroup(groupName stri
 	return repo.Add(group)
 }
 
-func (repo *ConfigGroupInMemRepository) RemoveConfigWithLabelFromGroup(groupName string, version string, configName string, configVersion string, label model.Label) error {
-	group, err := repo.Get(groupName, version)
-	if err != nil {
-		return err
-	}
-	for _, config := range group.Configs {
-		if config.Name == configName && config.Version == configVersion {
-			for j, l := range config.Labels {
-				if l.Key == label.Key && l.Value == label.Value {
-					config.Labels = append(config.Labels[:j], config.Labels[j+1:]...)
-					return repo.Add(group)
-				}
-			}
-		}
-	}
-	return errors.New("config not found")
-}
-
 func (repo *ConfigGroupInMemRepository) RemoveConfigsWithLabelsFromGroup(groupName string, groupVersion string, labels []model.Label) error {
 	group, err := repo.Get(groupName, groupVersion)
 	if err != nil {
 		return err
 	}
+	configFound := false
 	for i := 0; i < len(group.Configs); {
 		config := group.Configs[i]
 		if containsAllLabels(config.Labels, labels) {
 			group.Configs = append(group.Configs[:i], group.Configs[i+1:]...)
+			configFound = true
 		} else {
 			i++
 		}
 	}
-	return repo.Add(group)
+	if !configFound {
+		return errors.New("config not found with the provided labels")
+	}
+	return repo.Update(group)
 }
 
 func (repo *ConfigGroupInMemRepository) SearchConfigsWithLabelsInGroup(groupName string, version string, searchLabels []model.Label) ([]*model.ConfigWithLabels, error) {
@@ -147,36 +137,55 @@ func (repo *ConfigGroupInMemRepository) SearchConfigsWithLabelsInGroup(groupName
 	}
 	var result []*model.ConfigWithLabels
 	for _, config := range group.Configs {
-		if containsAnyLabel(config.Labels, searchLabels) {
+		if containsLabels(config.Labels, searchLabels) {
 			result = append(result, config)
 		}
 	}
 	if len(result) == 0 {
-		return nil, errors.New("no configs with any labels found")
+		return nil, errors.New("no configs with specified labels found")
 	}
 	return result, nil
 }
 
-func containsAllLabels(configLabels []model.Label, searchLabels []model.Label) bool {
-	labelSet := make(map[string]bool)
-	for _, label := range configLabels {
-		labelSet[label.Key+":"+label.Value] = true
-	}
-	for _, label := range searchLabels {
-		if !labelSet[label.Key+":"+label.Value] {
+func containsLabels(configLabels []model.Label, searchLabels []model.Label) bool {
+	for _, searchLabel := range searchLabels {
+		found := false
+		for _, configLabel := range configLabels {
+			if configLabel.Key == searchLabel.Key && configLabel.Value == searchLabel.Value {
+				found = true
+				break
+			}
+		}
+		if !found {
 			return false
 		}
 	}
 	return true
 }
 
-func containsAnyLabel(configLabels []model.Label, searchLabels []model.Label) bool {
-	for _, searchLabel := range searchLabels {
-		for _, configLabel := range configLabels {
-			if configLabel.Key == searchLabel.Key && configLabel.Value == searchLabel.Value {
-				return true
-			}
+func containsAllLabels(configLabels []model.Label, searchLabels []model.Label) bool {
+	if len(configLabels) != len(searchLabels) {
+		return false
+	}
+
+	labelSet := make(map[string]bool)
+	for _, label := range configLabels {
+		labelSet[label.Key+":"+label.Value] = true
+	}
+
+	for _, label := range searchLabels {
+		if !labelSet[label.Key+":"+label.Value] {
+			return false
 		}
 	}
-	return false
+
+	return true
+}
+
+func (repo *ConfigGroupInMemRepository) Update(configGroup model.ConfigGroup) error {
+	if _, exists := repo.configGroups[configGroup.Name]; !exists {
+		return errors.New("config group does not exist")
+	}
+	repo.configGroups[configGroup.Name][configGroup.Version] = configGroup
+	return nil
 }

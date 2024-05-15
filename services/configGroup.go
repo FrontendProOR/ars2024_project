@@ -40,10 +40,6 @@ func (s ConfigGroupService) AddConfigWithLabelToGroup(groupName string, version 
 	return s.repo.AddConfigWithLabelToGroup(groupName, version, config)
 }
 
-func (s ConfigGroupService) RemoveConfigWithLabelFromGroup(groupName string, version string, configName string, configVersion string, label model.Label) error {
-	return s.repo.RemoveConfigWithLabelFromGroup(groupName, version, configName, configVersion, label)
-}
-
 func (s ConfigGroupService) RemoveConfigsWithLabelsFromGroup(groupName string, version string, labels []model.Label) error {
 	return s.repo.RemoveConfigsWithLabelsFromGroup(groupName, version, labels)
 }

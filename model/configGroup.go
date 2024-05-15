@@ -23,7 +23,6 @@ type ConfigGroupRepository interface {
 	AddConfigToGroup(groupName string, version string, configName string, configVersion string) error
 	RemoveConfigFromGroup(groupName string, version string, configName string, configVersion string) error
 	AddConfigWithLabelToGroup(groupName string, version string, config ConfigWithLabels) error
-	RemoveConfigWithLabelFromGroup(groupName string, version string, configName string, configVersion string, label Label) error
 	SearchConfigsWithLabelsInGroup(groupName string, version string, labels []Label) ([]*ConfigWithLabels, error)
 	RemoveConfigsWithLabelsFromGroup(groupName string, version string, labels []Label) error
 }

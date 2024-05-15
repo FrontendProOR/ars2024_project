@@ -1,18 +1,10 @@
 package main
 
 import (
-	"context"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
+	"project/api"
 	"project/handlers"
 	"project/repositories"
 	"project/services"
-	"syscall"
-	"time"
-
-	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -25,39 +17,8 @@ func main() {
 	configGroupService := services.NewConfigGroupService(configGroupRepo)
 	configGroupHandler := handlers.NewConfigGroupHandler(configGroupService)
 	// Kreiranje novog router-a
-	router := mux.NewRouter()
-	// Registracija ruta za ConfigHandler
-	router.HandleFunc("/configs", configHandler.Add).Methods("POST")                       // Ruta za dodavanje konfiguracije
-	router.HandleFunc("/configs/{name}/{version}", configHandler.Get).Methods("GET")       // Ruta za pregled konfiguracije po imenu i verziji
-	router.HandleFunc("/configs/{name}/{version}", configHandler.Delete).Methods("DELETE") // Ruta za brisanje konfiguracije po imenu i verziji
-	// Registracija ruta za ConfigGroupHandler
-	router.HandleFunc("/config-groups", configGroupHandler.AddGroup).Methods("POST")                                                                              // Ruta za dodavanje konfiguracione grupe
-	router.HandleFunc("/config-groups/{name}/{version}", configGroupHandler.GetGroup).Methods("GET")                                                              // Ruta za pregled konfiguracione grupe po imenu i verziji
-	router.HandleFunc("/config-groups/{name}/{version}", configGroupHandler.RemoveGroup).Methods("DELETE")                                                        // Ruta za brisanje konfiguracione grupe po imenu i verziji
-	router.HandleFunc("/config-groups/{name}/{version}/{configName}/{configVersion}", configGroupHandler.AddConfigToGroup).Methods("POST")                        // Ruta za dodavanje postojeće konfiguracije u grupu
-	router.HandleFunc("/config-groups/{name}/{version}/{configName}/{configVersion}", configGroupHandler.RemoveConfigFromGroup).Methods("DELETE")                 // Ruta za uklanjanje konfiguracije iz grupe
-	router.HandleFunc("/config-groups/{name}/{version}/config/search", configGroupHandler.SearchConfigsWithLabelsInGroup).Methods("GET")                          // Registracija ruta za dodavanje i uklanjanje konfiguracije sa labelom
-	router.HandleFunc("/config-groups/{name}/{version}/config", configGroupHandler.AddConfigWithLabelToGroup).Methods("POST")                                     // Ruta za dodavanje konfiguracije sa labelom u grupu
-	router.HandleFunc("/config-groups/{name}/{version}/config/{configName}/{configVersion}", configGroupHandler.RemoveConfigWithLabelFromGroup).Methods("DELETE") // Ruta za uklanjanje konfiguracije sa labelom iz grupe
-	server := &http.Server{
-		Addr:    "0.0.0.0:8000",
-		Handler: router,
-	}
-	// Pokretanje HTTP servera u gorutini kako bi se moglo osluškivati za shutdown signal
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("ListenAndServe error: %v", err)
-		}
-	}()
-	// Osluškivanje za SIGINT i SIGTERM za Graceful Shutdown
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("Server is shutting down...")
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
-	}
-	log.Println("Server exited gracefully")
+	router := api.NewRouter(configHandler, configGroupHandler)
+
+	// Pokretanje servera
+	api.RunServer(router)
 }
