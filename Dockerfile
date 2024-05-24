@@ -1,3 +1,4 @@
+## Build stage 
 FROM golang:1.22.2 AS build
 
 # Set the Current Working Directory inside the container
@@ -6,10 +7,10 @@ WORKDIR /app
 # We want to populate the module cache based on the go.{mod,sum} files.
 COPY go.mod go.sum ./
 
-# Download all dependencies.
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed.
 RUN go mod download
 
-# Copy everything
+# Copy everything else into the current image.
 COPY ./ ./
 
 # Build the Go app
@@ -21,8 +22,8 @@ FROM alpine:3.14
 # Copy the binary from the build stage
 COPY --from=build /main .
 
-# Expose port
+# Expose port 8000
 EXPOSE 8000
 
-# Run the binary
+# Run the binary when the container starts
 CMD ["/main"]

@@ -1,0 +1,457 @@
+basePath: /
+definitions:
+  model.Config:
+    properties:
+      name:
+        type: string
+      params:
+        additionalProperties:
+          type: string
+        type: object
+      version:
+        type: string
+    type: object
+  model.ConfigGroup:
+    properties:
+      configs:
+        items:
+          $ref: '#/definitions/model.ConfigWithLabels'
+        type: array
+      name:
+        type: string
+      version:
+        type: string
+    type: object
+  model.ConfigWithLabels:
+    properties:
+      labels:
+        items:
+          $ref: '#/definitions/model.Label'
+        type: array
+      name:
+        type: string
+      params:
+        additionalProperties:
+          type: string
+        type: object
+      version:
+        type: string
+    type: object
+  model.Label:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API for managing configurations
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Config API
+  version: "1.0"
+paths:
+  /config-groups:
+    post:
+      consumes:
+      - application/json
+      description: Add a new configuration group
+      parameters:
+      - description: Configuration Group object
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/model.ConfigGroup'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Config group successfully added
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add configuration group
+      tags:
+      - configGroup
+  /config-groups/{name}/{version}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a configuration group by name and version
+      parameters:
+      - description: Configuration group name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration group version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Config group successfully removed
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Remove configuration group
+      tags:
+      - configGroup
+    get:
+      consumes:
+      - application/json
+      description: Get a configuration group by name and version
+      parameters:
+      - description: Configuration group name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration group version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ConfigGroup'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get configuration group
+      tags:
+      - configGroup
+  /config-groups/{name}/{version}/{configName}/{configVersion}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a configuration from a group by group name, group version,
+        config name and config version
+      parameters:
+      - description: Configuration group name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration group version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Configuration name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Configuration version
+        in: path
+        name: configVersion
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Config successfully removed from group
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Remove configuration from group
+      tags:
+      - configGroup
+    post:
+      consumes:
+      - application/json
+      description: Add a configuration to a group by group name and version
+      parameters:
+      - description: Configuration group name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration group version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Configuration name
+        in: path
+        name: configName
+        required: true
+        type: string
+      - description: Configuration version
+        in: path
+        name: configVersion
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Config successfully added to group
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add configuration to group
+      tags:
+      - configGroup
+  /config-groups/{name}/{version}/config:
+    post:
+      consumes:
+      - application/json
+      description: Add a configuration with labels to a group by group name and version
+      parameters:
+      - description: Configuration group name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration group version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Configuration object with labels
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/model.ConfigWithLabels'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Config with label successfully added to group
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add configuration with label to group
+      tags:
+      - configGroup
+  /config-groups/{name}/{version}/config/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Remove configurations with all labels from a group by group name
+        and version
+      parameters:
+      - description: Configuration group name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration group version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Labels in format key:value;key:value
+        in: query
+        name: labels
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Configs with labels successfully removed from group
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Remove configurations with labels from group
+      tags:
+      - configGroup
+  /config-groups/{name}/{version}/config/search:
+    get:
+      consumes:
+      - application/json
+      description: Search for configurations with all labels in a group by group name
+        and version
+      parameters:
+      - description: Configuration group name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration group version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Labels in format key:value;key:value
+        in: query
+        name: labels
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ConfigWithLabels'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Search configurations with labels in group
+      tags:
+      - configGroup
+  /configs:
+    post:
+      consumes:
+      - application/json
+      description: Add a new configuration
+      parameters:
+      - description: Configuration object
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/model.Config'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Config successfully added
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add configuration
+      tags:
+      - config
+  /configs/{name}/{version}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a configuration by name and version
+      parameters:
+      - description: Configuration name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Config successfully deleted
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Delete configuration
+      tags:
+      - config
+    get:
+      consumes:
+      - application/json
+      description: Get a configuration by name and version
+      parameters:
+      - description: Configuration name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Configuration version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Config'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get configuration
+      tags:
+      - config
+swagger: "2.0"
