@@ -1,5 +1,6 @@
-// api/server.go ili web/server.go
-package api // ili package web
+// The `RunServer` function starts an HTTP server with a given router and handles graceful shutdown on
+// receiving SIGINT or SIGTERM signals.
+package api
 
 import (
 	"context"
@@ -16,13 +17,14 @@ func RunServer(router http.Handler) {
 		Addr:    "0.0.0.0:8000",
 		Handler: router,
 	}
-	// Pokretanje HTTP servera u gorutini kako bi se moglo osluškivati za shutdown signal
+
+	// Start the server in a goroutine
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("ListenAndServe error: %v", err)
 		}
 	}()
-	// Osluškivanje za SIGINT i SIGTERM za Graceful Shutdown
+	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit

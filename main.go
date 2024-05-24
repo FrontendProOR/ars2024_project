@@ -1,24 +1,34 @@
+// The main function initializes database, repositories, services, handlers, and a router for a Go
+// project and starts the server.
 package main
 
 import (
+	"log"
 	"project/api"
+	"project/data"
 	"project/handlers"
 	"project/repositories"
 	"project/services"
 )
 
 func main() {
-	// Inicijalizacija repozitorijuma, servisa i handlera za Config
-	configRepo := repositories.NewConfigInMemRepository()
+	// Initialisation of database
+	db, err := data.NewDatabase()
+	if err != nil {
+		log.Fatalf("Error initializing database: %v", err)
+	}
+
+	// Initialisation of repositories, services, and handlers for Config
+	configRepo := repositories.NewConfigDBRepository(db)
 	configService := services.NewConfigService(configRepo)
 	configHandler := handlers.NewConfigHandler(configService)
-	// Inicijalizacija repozitorijuma, servisa i handlera za ConfigGroup
-	configGroupRepo := repositories.NewConfigGroupInMemRepository(configRepo) // Pretpostavka da postoji ovaj repozitorijum
+	// Initialisation of repositories, services, and handlers for ConfigGroup
+	configGroupRepo := repositories.NewConfigGroupDBRepository(db)
 	configGroupService := services.NewConfigGroupService(configGroupRepo)
 	configGroupHandler := handlers.NewConfigGroupHandler(configGroupService)
-	// Kreiranje novog router-a
+	// Creating a new router
 	router := api.NewRouter(configHandler, configGroupHandler)
 
-	// Pokretanje servera
+	// Running the server
 	api.RunServer(router)
 }

@@ -1,0 +1,159 @@
+<!--
+    This HTML file represents a web application interface.
+    It consists of two main sections: the left-side and the right-side.
+    The left-side contains an input field, two buttons, and a message display area.
+    The right-side contains a textarea for JSON input, a button, and a JSON display area.
+
+    The CSS styles define the layout and appearance of the elements.
+    The JavaScript code handles user actions and performs HTTP requests using the Fetch API.
+
+    To use this application, enter a URL in the input field and click the "Prikaži" button to perform a GET request.
+    Click the "Izbriši" button to perform a DELETE request.
+    Enter a valid JSON in the textarea and click the "Dodaj" button to perform a POST request.
+
+    The response data is displayed in the JSON display area, and any error messages are shown in the message area.
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Go Application</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .left-side,
+        .right-side {
+            display: flex;
+            flex-direction: column;
+            width: 45%;
+        }
+
+        .left-side {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 45%;
+            height: 100vh;
+        }
+
+        .right-side {
+            justify-content: space-between;
+        }
+
+        #inputField,
+        #json-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            color: white;
+            background-color: #007BFF;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        #json-display,
+        #json-input {
+            margin-top: 20px;
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: auto;
+            padding: 10px;
+            font-family: monospace;
+        }
+    </style>
+    <script>
+        function performAction(method) {
+            var message = document.getElementById('message');
+            message.textContent = '';
+            var url = document.getElementById('inputField').value;
+            var options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            if (method === 'POST') {
+                var jsonInput = document.getElementById('json-input').value;
+                try {
+                    options.body = JSON.stringify(JSON.parse(jsonInput));
+                } catch (error) {
+                    message.textContent = 'Greška: Neispravan JSON';
+                    return;
+                }
+            }
+            fetch(url, options)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP error ' + response.status);
+                    }
+                    return response.text().then(text => {
+                        try {
+                            return JSON.parse(text);
+                        } catch (error) {
+                            return text;
+                        }
+                    });
+                })
+                .then(data => {
+                    var jsonDisplay = document.getElementById('json-display');
+                    if (method === 'GET') {
+                        jsonDisplay.textContent = '';
+                        if (data) {
+                            jsonDisplay.textContent = JSON.stringify(data, null, 2);
+                        }
+                    } else {
+                        message.textContent = 'Operacija uspešna';
+                    }
+                })
+                .catch(error => {
+                    message.textContent = 'Greška: ' + error;
+                });
+        }
+    </script>
+</head>
+
+<body>
+    <div class="left-side">
+        <input type="text" id="inputField" placeholder="Unesite URL ovde">
+        <button id="prikazi" onclick="performAction('GET')">Prikaži</button>
+        <button id="izbrisi" onclick="performAction('DELETE')">Izbriši</button>
+        <div id="message"></div>
+    </div>
+    <div class="right-side">
+        <textarea id="json-input" placeholder="Unesite JSON ovde"></textarea>
+        <button id="dodaj" onclick="performAction('POST')">Dodaj</button>
+        <pre id="json-display"></pre>
+    </div>
+</body>
+
+</html>
