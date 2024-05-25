@@ -45,10 +45,25 @@ func (repo *ConfigGroupDBRepository) Add(configGroup model.ConfigGroup) error {
 		}
 	}
 
-	// Add the group key without value
-	_, err = repo.db.Put("config-groups", configGroup.Name, configGroup.Version, nil)
-	if err != nil {
-		return err
+	// Check if the group has configs
+	hasConfigs := len(configGroup.Configs) > 0
+
+	// Add the group key without value only if it has no configs
+	if !hasConfigs {
+		_, err = repo.db.Put("config-groups", configGroup.Name, configGroup.Version, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Add configs to the group
+	for _, config := range configGroup.Configs {
+		keyType := "config-groups"
+		name := fmt.Sprintf("%s/%s/configs/%s", configGroup.Name, configGroup.Version, config.Name)
+		_, err = repo.db.Put(keyType, name, config.Version, config)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
