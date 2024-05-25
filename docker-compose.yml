@@ -15,8 +15,19 @@ services:
 
   consul:
     image: consul:1.15.4
+<<<<<<< HEAD
     command: agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
     ports:
       - 8500:8500
     volumes:
       - /consul_data:/consul/data
+=======
+    ports:
+      - 8500:8500
+    volumes:
+      - consul_data:/consul/data
+    command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
+
+volumes:
+  consul_data:
+>>>>>>> 4212f05bf4d612ee02c83a19b5a1cf44ad0c8f3a
