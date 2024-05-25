@@ -1,3 +1,9 @@
+// Package model defines the ConfigGroup struct and its repository interface.
+//
+// ConfigGroup holds a name, version, and a list of ConfigWithLabels.
+// ConfigWithLabels is a Config with an additional Labels field.
+// Label represents a key-value pair.
+// ConfigGroupRepository outlines the required methods for a config group repository.
 package model
 
 type Label struct {

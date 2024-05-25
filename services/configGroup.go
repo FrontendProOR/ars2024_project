@@ -1,3 +1,5 @@
+// The `ConfigGroupService` struct provides methods for interacting with configuration groups in a
+// project.
 package services
 
 import "project/model"

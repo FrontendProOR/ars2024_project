@@ -1,3 +1,5 @@
+// The above code defines a set of HTTP handlers for managing configuration groups and configurations
+// with labels in a Go application.
 package handlers
 
 import (
@@ -20,7 +22,7 @@ func NewConfigGroupHandler(repo services.ConfigGroupService) *ConfigGroupHandler
 	}
 }
 
-// Dodavanje konfiguracione grupe
+// Adds a new configuration group
 func (h *ConfigGroupHandler) AddGroup(w http.ResponseWriter, r *http.Request) {
 	var group model.ConfigGroup
 	if err := json.NewDecoder(r.Body).Decode(&group); err != nil {
@@ -37,7 +39,7 @@ func (h *ConfigGroupHandler) AddGroup(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Config group successfully added"))
 }
 
-// Pregled konfiguracione grupe
+// Retrieves a configuration group
 func (h *ConfigGroupHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
@@ -58,7 +60,7 @@ func (h *ConfigGroupHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-// Uklanjanje konfiguracione grupe
+// Removes a configuration group
 func (h *ConfigGroupHandler) RemoveGroup(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
@@ -72,7 +74,7 @@ func (h *ConfigGroupHandler) RemoveGroup(w http.ResponseWriter, r *http.Request)
 	w.Write([]byte("Config group successfully removed"))
 }
 
-// Dodavanje konfiguracije u grupu
+// Adds a configuration to a group
 func (h *ConfigGroupHandler) AddConfigToGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
@@ -89,7 +91,7 @@ func (h *ConfigGroupHandler) AddConfigToGroup(w http.ResponseWriter, r *http.Req
 	w.Write([]byte("Config successfully added to group"))
 }
 
-// Uklanjanje konfiguracije iz grupe
+// Removes a configuration from a group
 func (h *ConfigGroupHandler) RemoveConfigFromGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
 	groupVersion := mux.Vars(r)["version"]
@@ -106,7 +108,7 @@ func (h *ConfigGroupHandler) RemoveConfigFromGroup(w http.ResponseWriter, r *htt
 	w.Write([]byte("Config successfully removed from group"))
 }
 
-// Dodavanje konfiguracije sa labelom u grupu
+// Adds a configuration with labels to a group
 func (h *ConfigGroupHandler) AddConfigWithLabelToGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
@@ -126,7 +128,7 @@ func (h *ConfigGroupHandler) AddConfigWithLabelToGroup(w http.ResponseWriter, r 
 	w.Write([]byte("Config with label successfully added to group"))
 }
 
-// Uklanjanje konfiguracija sa svim labelama iz grupe
+// Removes configurations with labels from a group
 func (h *ConfigGroupHandler) RemoveConfigsWithLabelsFromGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
 	groupVersion := mux.Vars(r)["version"]
@@ -157,7 +159,7 @@ func (h *ConfigGroupHandler) RemoveConfigsWithLabelsFromGroup(w http.ResponseWri
 	w.Write([]byte("Configs with labels successfully removed from group"))
 }
 
-// Pretraga konfiguracije sa labelom unutar grupe
+// Searches for configurations with labels in a group
 func (h *ConfigGroupHandler) SearchConfigsWithLabelsInGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]

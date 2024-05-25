@@ -1,3 +1,5 @@
+// The code defines a ConfigHandler struct with methods for adding, retrieving, and deleting
+// configurations using a ConfigService.
 package handlers
 
 import (
@@ -19,7 +21,7 @@ func NewConfigHandler(service services.ConfigService) *ConfigHandler {
 	}
 }
 
-// Dodavanje konfiguracije
+// Adds a new configuration
 func (c ConfigHandler) Add(w http.ResponseWriter, r *http.Request) {
 	var config model.Config
 	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
@@ -36,7 +38,7 @@ func (c ConfigHandler) Add(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Config successfully added"))
 }
 
-// Pregled konfiguracije po imenu i verziji
+// Retrieves a configuration
 func (c ConfigHandler) Get(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
@@ -57,7 +59,7 @@ func (c ConfigHandler) Get(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-// Brisanje konfiguracije po imenu i verziji
+// Deletes a configuration
 func (c ConfigHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]

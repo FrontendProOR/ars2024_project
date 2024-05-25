@@ -1,3 +1,7 @@
+// Package model defines the Config struct and its repository interface.
+//
+// Config holds a name, version, and parameters.
+// ConfigRepository outlines the required methods for a config repository.
 package model
 
 type Config struct {

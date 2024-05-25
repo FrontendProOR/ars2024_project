@@ -1,3 +1,5 @@
+// The code defines a ConfigService struct with methods to add, get, and delete configuration data
+// using a ConfigRepository.
 package services
 
 import (
