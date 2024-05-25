@@ -23,9 +23,9 @@ func NewRouter(configHandler *handlers.ConfigHandler, configGroupHandler *handle
 	router.Handle("/config-groups/{name}/{version}", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.GetGroup))).Methods("GET")
 	router.Handle("/config-groups/{name}/{version}", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.RemoveGroup))).Methods("DELETE")
 	router.Handle("/config-groups/{name}/{version}/{configName}/{configVersion}", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.AddConfigToGroup))).Methods("POST")
-	router.Handle("/config-groups/{name}/{version}/config/search", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.SearchConfigsWithLabelsInGroup))).Methods("GET")
-	router.Handle("/config-groups/{name}/{version}/config", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.AddConfigWithLabelToGroup))).Methods("POST")
-	router.Handle("/config-groups/{name}/{version}/config/delete", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.RemoveConfigsWithLabelsFromGroup))).Methods("DELETE")
+	router.Handle("/config-groups/{name}/{version}/configs/search", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.SearchConfigsWithLabelsInGroup))).Methods("GET")
+	router.Handle("/config-groups/{name}/{version}/configs", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.AddConfigWithLabelToGroup))).Methods("POST")
+	router.Handle("/config-groups/{name}/{version}/configs/delete", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.RemoveConfigsWithLabelsFromGroup))).Methods("DELETE")
 	router.Handle("/config-groups/{name}/{version}/{configName}/{configVersion}", middleware.RateLimiter(http.HandlerFunc(configGroupHandler.RemoveConfigFromGroup))).Methods("DELETE")
 
 	// Registration of route for serving the frontend

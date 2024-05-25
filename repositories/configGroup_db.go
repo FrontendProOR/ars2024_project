@@ -226,15 +226,37 @@ func (repo *ConfigGroupDBRepository) RemoveConfigFromGroup(groupName string, ver
 	return repo.db.Delete(fmt.Sprintf("config-groups/%s/%s/configs/%s/%s", groupName, version, configName, configVersion))
 }
 
+// This `AddConfigWithLabelToGroup` method in the `ConfigGroupDBRepository` struct is responsible for
+// adding a new configuration with labels to a specific configuration group within the repository.
+// Here's a breakdown of what the method does:
 func (repo *ConfigGroupDBRepository) AddConfigWithLabelToGroup(groupName string, version string, config model.ConfigWithLabels) error {
+	// Get the config group
 	configGroup, err := repo.Get(groupName, version)
 	if err != nil {
 		return err
 	}
-	configGroup.Configs = append(configGroup.Configs, &config)
-	return repo.Add(configGroup)
+
+	// Check if the config already exists in the group
+	for _, existingConfig := range configGroup.Configs {
+		if existingConfig.Name == config.Name && existingConfig.Version == config.Version {
+			return errors.New("config already exists in the group")
+		}
+	}
+
+	// Add the config to the group
+	keyType := "config-groups"
+	name := fmt.Sprintf("%s/%s/configs/%s", groupName, version, config.Name)
+	_, err = repo.db.Put(keyType, name, config.Version, config)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
+// This `SearchConfigsWithLabelsInGroup` method in the `ConfigGroupDBRepository` struct is responsible
+// for searching and retrieving configurations within a specific configuration group that match a given
+// set of labels. Here's a breakdown of what the method does:
 func (repo *ConfigGroupDBRepository) SearchConfigsWithLabelsInGroup(groupName string, version string, labels []model.Label) ([]*model.ConfigWithLabels, error) {
 	configGroup, err := repo.Get(groupName, version)
 	if err != nil {
@@ -266,18 +288,53 @@ func containsLabels(configLabels []model.Label, labels []model.Label) bool {
 }
 
 func (repo *ConfigGroupDBRepository) RemoveConfigsWithLabelsFromGroup(groupName string, version string, labels []model.Label) error {
+	// Get the config group
 	configGroup, err := repo.Get(groupName, version)
 	if err != nil {
 		return err
 	}
-	var newConfigs []*model.ConfigWithLabels
+
+	// Search for configs with the given labels and number of labels
+	var configsToRemove []*model.ConfigWithLabels
 	for _, config := range configGroup.Configs {
-		if !containsLabels(config.Labels, labels) {
-			newConfigs = append(newConfigs, config)
+		if containsAllLabels(config.Labels, labels) {
+			configsToRemove = append(configsToRemove, config)
 		}
 	}
-	configGroup.Configs = newConfigs
-	return repo.Add(configGroup)
+
+	// If there is config with exactly the same labels (in terms of number and values) as the given labels
+	if len(configsToRemove) == 0 {
+		return errors.New("no configs with all labels found")
+	}
+
+	// Remove the configs
+	for _, config := range configsToRemove {
+		err := repo.RemoveConfigFromGroup(groupName, version, config.Name, config.Version)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-// Implement other methods (AddConfigToGroup, RemoveConfigFromGroup, etc.) similarly
+func containsAllLabels(configLabels []model.Label, labels []model.Label) bool {
+	// Check if all labels are present in the config in terms of number and values
+	if len(configLabels) != len(labels) {
+		return false
+	}
+
+	for _, label := range labels {
+		found := false
+		for _, configLabel := range configLabels {
+			if configLabel.Key == label.Key && configLabel.Value == label.Value {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
