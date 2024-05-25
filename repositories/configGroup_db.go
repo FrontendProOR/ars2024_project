@@ -45,12 +45,10 @@ func (repo *ConfigGroupDBRepository) Add(configGroup model.ConfigGroup) error {
 		}
 	}
 
-	// For each config in the group, put it in its own "file" within the "configs" folder
-	for _, config := range configGroup.Configs {
-		_, err := repo.db.Put(fmt.Sprintf("config-groups/%s/%s/configs", configGroup.Name, configGroup.Version), config.Name, config.Version, config)
-		if err != nil {
-			return err
-		}
+	// Add the group key without value
+	_, err = repo.db.Put("config-groups", configGroup.Name, configGroup.Version, nil)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -122,17 +120,71 @@ func (repo *ConfigGroupDBRepository) Delete(name string, version string) error {
 	return repo.db.Delete(fmt.Sprintf("config-groups/%s/%s", name, version))
 }
 
+// The `AddConfigToGroup` method in the `ConfigGroupDBRepository` struct is responsible for adding a
+// new configuration to a specific configuration group within the repository. Here's a breakdown of
+// what the method does:
 func (repo *ConfigGroupDBRepository) AddConfigToGroup(groupName string, version string, configName string, configVersion string) error {
+	// Get the config
 	var config model.Config
 	err := repo.db.Get(fmt.Sprintf("configs/%s/%s", configName, configVersion), &config)
 	if err != nil {
 		return err
 	}
-	configWithLabels := model.ConfigWithLabels{
-		Config: config,
-		Labels: []model.Label{},
+
+	// Get the config group
+	configGroup, err := repo.Get(groupName, version)
+	if err != nil {
+		return err
 	}
-	return repo.AddConfigWithLabelToGroup(groupName, version, configWithLabels)
+
+	// Check if the config already exists in the group
+	for _, existingConfig := range configGroup.Configs {
+		if existingConfig.Name == configName && existingConfig.Version == configVersion {
+			return errors.New("config already exists in the group")
+		}
+	}
+
+	// Check if the config group is empty
+	isEmpty := len(configGroup.Configs) == 0
+
+	// Add the config to the group
+	keyType := "config-groups"
+	name := fmt.Sprintf("%s/%s/configs/%s", groupName, version, configName)
+	_, err = repo.db.Put(keyType, name, configVersion, config)
+	if err != nil {
+		return err
+	}
+
+	// If the config group was empty, delete the old key
+	if isEmpty {
+		oldKey := fmt.Sprintf("config-groups/%s/%s", groupName, version)
+		err = repo.db.Delete(oldKey)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// The `Update` method in the `ConfigGroupDBRepository` struct is responsible for updating an existing
+// configuration group in the repository. Here's a breakdown of what the method does:
+func (repo *ConfigGroupDBRepository) Update(configGroup model.ConfigGroup) error {
+	// Validation
+	if strings.TrimSpace(configGroup.Name) == "" {
+		return errors.New("configGroup name cannot be empty")
+	}
+	if strings.TrimSpace(configGroup.Version) == "" {
+		return errors.New("configGroup version cannot be empty")
+	}
+
+	// Update the group
+	_, err := repo.db.Put("config-groups", configGroup.Name, configGroup.Version, configGroup)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (repo *ConfigGroupDBRepository) RemoveConfigFromGroup(groupName string, version string, configName string, configVersion string) error {
