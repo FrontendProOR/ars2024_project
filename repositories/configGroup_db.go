@@ -271,6 +271,15 @@ func (repo *ConfigGroupDBRepository) AddConfigWithLabelToGroup(groupName string,
 		return err
 	}
 
+	// If the config group was empty, delete the old key
+	if len(configGroup.Configs) == 0 {
+		oldKey := fmt.Sprintf("config-groups/%s/%s", groupName, version)
+		err = repo.db.Delete(oldKey)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

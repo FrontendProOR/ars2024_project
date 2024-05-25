@@ -20,6 +20,7 @@ FROM alpine:3.14
 
 # Copy the binary from the build stage
 COPY --from=build /main .
+COPY --from=build /app/web /web
 
 # Expose port
 EXPOSE 8000
