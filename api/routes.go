@@ -14,8 +14,12 @@ import (
 func NewRouter(configHandler *handlers.ConfigHandler, configGroupHandler *handlers.ConfigGroupHandler) *mux.Router {
 	router := mux.NewRouter()
 
-	// Swagger UI
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", http.FileServer(http.Dir("/docs/"))))
+
+	// Serve Swagger UI
+	router.PathPrefix("/swagger-ui/").Handler(httpSwagger.Handler(
+		httpSwagger.URL("/swagger.json"),
+	))
 
 	// Registration of routes for ConfigHandler
 	router.Handle("/configs", middleware.RateLimiter(http.HandlerFunc(configHandler.Add))).Methods("POST")
