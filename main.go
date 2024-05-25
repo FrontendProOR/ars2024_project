@@ -10,6 +10,8 @@ import (
 	"project/repositories"
 	"project/services"
 
+	_ "project/docs"
+
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
