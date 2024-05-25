@@ -202,7 +202,27 @@ func (repo *ConfigGroupDBRepository) Update(configGroup model.ConfigGroup) error
 	return nil
 }
 
+// The `RemoveConfigFromGroup` method in the `ConfigGroupDBRepository` struct is responsible for
+// removing a specific configuration from a configuration group within the repository. Here's a
+// breakdown of what the method does:
 func (repo *ConfigGroupDBRepository) RemoveConfigFromGroup(groupName string, version string, configName string, configVersion string) error {
+	// Check if the config exists in the group
+	configGroup, err := repo.Get(groupName, version)
+	if err != nil {
+		return err
+	}
+	found := false
+	for _, config := range configGroup.Configs {
+		if config.Name == configName && config.Version == configVersion {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return errors.New("config not found in the group")
+	}
+
+	// If the config exists, delete it
 	return repo.db.Delete(fmt.Sprintf("config-groups/%s/%s/configs/%s/%s", groupName, version, configName, configVersion))
 }
 
