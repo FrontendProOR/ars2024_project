@@ -206,14 +206,18 @@ func (repo *ConfigGroupDBRepository) Update(configGroup model.ConfigGroup) error
 // removing a specific configuration from a configuration group within the repository. Here's a
 // breakdown of what the method does:
 func (repo *ConfigGroupDBRepository) RemoveConfigFromGroup(groupName string, version string, configName string, configVersion string) error {
-	// Check if the config exists in the group
+	// Get the config group
 	configGroup, err := repo.Get(groupName, version)
 	if err != nil {
 		return err
 	}
+
+	// Check if the config exists in the group
 	found := false
-	for _, config := range configGroup.Configs {
-		if config.Name == configName && config.Version == configVersion {
+	for i, existingConfig := range configGroup.Configs {
+		if existingConfig.Name == configName && existingConfig.Version == configVersion {
+			// Remove the config from the group
+			configGroup.Configs = append(configGroup.Configs[:i], configGroup.Configs[i+1:]...)
 			found = true
 			break
 		}
@@ -222,8 +226,24 @@ func (repo *ConfigGroupDBRepository) RemoveConfigFromGroup(groupName string, ver
 		return errors.New("config not found in the group")
 	}
 
-	// If the config exists, delete it
-	return repo.db.Delete(fmt.Sprintf("config-groups/%s/%s/configs/%s/%s", groupName, version, configName, configVersion))
+	// Delete the config from the database
+	key := fmt.Sprintf("config-groups/%s/%s/configs/%s/%s", groupName, version, configName, configVersion)
+	err = repo.db.Delete(key)
+	if err != nil {
+		return err
+	}
+
+	// Check if there are no more configs in the group
+	if len(configGroup.Configs) == 0 {
+		// Update the group key in the database
+		keyType := "config-groups"
+		_, err = repo.db.Put(keyType, groupName, version, configGroup)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // This `AddConfigWithLabelToGroup` method in the `ConfigGroupDBRepository` struct is responsible for
@@ -287,6 +307,9 @@ func containsLabels(configLabels []model.Label, labels []model.Label) bool {
 	return true
 }
 
+// The `RemoveConfigsWithLabelsFromGroup` method in the `ConfigGroupDBRepository` struct is responsible
+// for removing configurations from a specific configuration group that match a given set of labels.
+// Here's a breakdown of what the method does:
 func (repo *ConfigGroupDBRepository) RemoveConfigsWithLabelsFromGroup(groupName string, version string, labels []model.Label) error {
 	// Get the config group
 	configGroup, err := repo.Get(groupName, version)
