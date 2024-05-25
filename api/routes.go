@@ -8,10 +8,14 @@ import (
 	"project/handlers"
 
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func NewRouter(configHandler *handlers.ConfigHandler, configGroupHandler *handlers.ConfigGroupHandler) *mux.Router {
 	router := mux.NewRouter()
+
+	// Swagger UI
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	// Registration of routes for ConfigHandler
 	router.Handle("/configs", middleware.RateLimiter(http.HandlerFunc(configHandler.Add))).Methods("POST")

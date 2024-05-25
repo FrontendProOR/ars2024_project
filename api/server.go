@@ -18,6 +18,9 @@ func RunServer(router http.Handler) {
 		Handler: router,
 	}
 
+	log.Println("Server started on http://localhost:8000")
+	log.Println("Swagger UI available at http://localhost:8000/swagger/index.html")
+
 	// Start the server in a goroutine
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

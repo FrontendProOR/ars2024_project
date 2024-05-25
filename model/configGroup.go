@@ -1,15 +1,18 @@
 package model
 
+// Label represents a key-value pair used for labeling configurations.
 type Label struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
+// ConfigWithLabels represents a configuration along with its labels.
 type ConfigWithLabels struct {
 	Config
 	Labels []Label `json:"labels"`
 }
 
+// ConfigGroup represents a group of configurations.
 type ConfigGroup struct {
 	Name    string              `json:"name"`
 	Version string              `json:"version"`
