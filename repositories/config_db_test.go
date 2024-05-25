@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConfigDBRepository_Get(t *testing.T) {
+func TestConfigDBRepository_Add_Get_Delete(t *testing.T) {
 	// Create a new database instance
 	db, err := data.NewDatabase()
 	assert.NoError(t, err)
@@ -38,4 +38,8 @@ func TestConfigDBRepository_Get(t *testing.T) {
 
 	// Check if the retrieved configuration is the same as the original configuration
 	assert.Equal(t, config, retrievedConfig)
+
+	// Delete the configuration from the database
+	err = repo.Delete(config.Name, config.Version)
+	assert.NoError(t, err)
 }
