@@ -1,15 +1,10 @@
 # API Dokumentacija
 
 Ova dokumentacija opisuje rute i operacije dostupne u našem API-ju za manipulaciju konfiguracijama i konfiguracionim grupama.
-## Opšti podaci
-
-- **Swagger dokumentacija:** [http://localhost:8000/swagger](http://localhost:8000/swagger)
-- **Consul port:** [http://localhost:8500](http://localhost:8500)
-- **Port aplikacije:** [http://localhost:8000](http://localhost:8000)
 
 ## Opšti podaci
 
-- **Swagger dokumentacija:** [http://localhost:8000/swagger](http://localhost:8000/swagger)
+- **Swagger dokumentacija:** [http://localhost:8000/swagger/index.html](http://localhost:8000/swagger/index.html)
 - **Consul port:** [http://localhost:8500](http://localhost:8500)
 - **Port aplikacije:** [http://localhost:8000](http://localhost:8000)
 
