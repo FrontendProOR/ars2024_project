@@ -19,18 +19,18 @@ func NewRouter(configHandler *handlers.ConfigHandler, configGroupHandler *handle
 
 	// Registration of routes for ConfigHandler
 	router.Handle("/configs", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configHandler.Add), "POST", "/configs"))).Methods("POST")
-	router.Handle("/configs/{name}/{version}", middleware.RateLimiter(Count(configHandler.Get, "GET", "/configs/{name}/{version}"))).Methods("GET")
-	router.Handle("/configs/{name}/{version}", middleware.RateLimiter(Count(configHandler.Delete, "DELETE", "/configs/{name}/{version}"))).Methods("DELETE")
+	router.Handle("/configs/{name}/{version}", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configHandler.Get), "GET", "/configs/{name}/{version}"))).Methods("GET")
+	router.Handle("/configs/{name}/{version}", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configHandler.Delete), "DELETE", "/configs/{name}/{version}"))).Methods("DELETE")
 
 	// Registration of routes for ConfigGroupHandler
 	router.Handle("/config-groups", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configGroupHandler.AddGroup), "POST", "/config-groups"))).Methods("POST")
-	router.Handle("/config-groups/{name}/{version}", middleware.RateLimiter(Count(configGroupHandler.GetGroup, "GET", "/config-groups/{name}/{version}"))).Methods("GET")
-	router.Handle("/config-groups/{name}/{version}", middleware.RateLimiter(Count(configGroupHandler.RemoveGroup, "DELETE", "/config-groups/{name}/{version}"))).Methods("DELETE")
-	router.Handle("/config-groups/{name}/{version}/{configName}/{configVersion}", middleware.RateLimiter(Count(configGroupHandler.AddConfigToGroup, "POST", "/config-groups/{name}/{version}/{configName}/{configVersion}"))).Methods("POST")
-	router.Handle("/config-groups/{name}/{version}/configs/search", middleware.RateLimiter(Count(configGroupHandler.SearchConfigsWithLabelsInGroup, "GET", "/config-groups/{name}/{version}/configs/search"))).Methods("GET")
-	router.Handle("/config-groups/{name}/{version}/configs", middleware.RateLimiter(Count(configGroupHandler.AddConfigWithLabelToGroup, "POST", "/config-groups/{name}/{version}/configs"))).Methods("POST")
-	router.Handle("/config-groups/{name}/{version}/configs/delete", middleware.RateLimiter(Count(configGroupHandler.RemoveConfigsWithLabelsFromGroup, "DELETE", "/config-groups/{name}/{version}/configs/delete"))).Methods("DELETE")
-	router.Handle("/config-groups/{name}/{version}/{configName}/{configVersion}", middleware.RateLimiter(Count(configGroupHandler.RemoveConfigFromGroup, "DELETE", "/config-groups/{name}/{version}/{configName}/{configVersion}"))).Methods("DELETE")
+	router.Handle("/config-groups/{name}/{version}", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configGroupHandler.GetGroup), "GET", "/config-groups/{name}/{version}"))).Methods("GET")
+	router.Handle("/config-groups/{name}/{version}", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configGroupHandler.RemoveGroup), "DELETE", "/config-groups/{name}/{version}"))).Methods("DELETE")
+	router.Handle("/config-groups/{name}/{version}/{configName}/{configVersion}", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configGroupHandler.AddConfigToGroup), "POST", "/config-groups/{name}/{version}/{configName}/{configVersion}"))).Methods("POST")
+	router.Handle("/config-groups/{name}/{version}/configs/search", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configGroupHandler.SearchConfigsWithLabelsInGroup), "GET", "/config-groups/{name}/{version}/configs/search"))).Methods("GET")
+	router.Handle("/config-groups/{name}/{version}/configs", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configGroupHandler.AddConfigWithLabelToGroup), "POST", "/config-groups/{name}/{version}/configs"))).Methods("POST")
+	router.Handle("/config-groups/{name}/{version}/configs/delete", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configGroupHandler.RemoveConfigsWithLabelsFromGroup), "DELETE", "/config-groups/{name}/{version}/configs/delete"))).Methods("DELETE")
+	router.Handle("/config-groups/{name}/{version}/{configName}/{configVersion}", middleware.RateLimiter(Count(middleware.IdempotencyCheck(configGroupHandler.RemoveConfigFromGroup), "DELETE", "/config-groups/{name}/{version}/{configName}/{configVersion}"))).Methods("DELETE")
 
 	// Registration of route for serving the frontend
 	router.HandleFunc("/", Count(func(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +41,7 @@ func NewRouter(configHandler *handlers.ConfigHandler, configGroupHandler *handle
 	router.Path("/metrics").Handler(MetricsHandler())
 
 	// Example POST route with metrics counting
-	router.HandleFunc("/post/", Count(configHandler.Add, "POST", "/post")).Methods("POST")
+	// router.HandleFunc("/post/", Count(middleware.IdempotencyCheck(configHandler.Add), "POST", "/post")).Methods("POST")
 
 	return router
 }
