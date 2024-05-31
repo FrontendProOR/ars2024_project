@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+
 	"sync"
 	"time"
 
@@ -64,72 +65,36 @@ func MetricsHandler() http.Handler {
 
 // Count is a middleware function to count HTTP requests, measure request duration,
 // and calculate request rate.
-// THREDOVI SU PRAVILI PARALELNO TRIGER NA INC
-// func Count(f http.HandlerFunc, method, endpoint string) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		start := time.Now()
-
-// 		// Increment total request count
-// 		mutex.Lock()
-// 		totalRequests.Inc()
-// 		mutex.Unlock()
-
-// 		// Execute the handler
-// 		rr := &responseRecorder{w, http.StatusOK}
-// 		f(rr, r)
-
-// 		// Measure request duration
-// 		duration := time.Since(start).Seconds()
-// 		requestDuration.WithLabelValues(method, endpoint).Observe(duration)
-
-// 		// Increment successful or failed request count based on status code
-// 		if statusCode := rr.statusCode; statusCode >= 200 && statusCode < 400 {
-// 			mutex.Lock()
-// 			successfulRequests.Inc()
-// 			mutex.Unlock()
-// 		} else {
-// 			mutex.Lock()
-// 			failedRequests.Inc()
-// 			mutex.Unlock()
-// 		}
-
-// 		// Update request rate
-// 		updateRequestRate(method, endpoint)
-// 	}
-// }
-
-// SERIJSKO/PARALELNO
 func Count(f http.HandlerFunc, method, endpoint string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Start a Goroutine to handle the request concurrently
-		go func() {
-			start := time.Now()
+		start := time.Now()
 
-			// Increment total request count
-			totalRequests.Inc()
+		// Increment total request count
+		mutex.Lock()
+		totalRequests.Inc()
+		mutex.Unlock()
 
-			// Execute the handler
-			rr := &responseRecorder{w, http.StatusOK}
-			f(rr, r)
+		// Execute the handler
+		rr := &responseRecorder{w, http.StatusOK}
+		f(rr, r)
 
-			// Measure request duration
-			duration := time.Since(start).Seconds()
-			requestDuration.WithLabelValues(method, endpoint).Observe(duration)
+		// Measure request duration
+		duration := time.Since(start).Seconds()
+		requestDuration.WithLabelValues(method, endpoint).Observe(duration)
 
-			// Increment successful or failed request count based on status code
-			if statusCode := rr.statusCode; statusCode >= 200 && statusCode < 400 {
-				successfulRequests.Inc()
-			} else {
-				failedRequests.Inc()
-			}
+		// Increment successful or failed request count based on status code
+		if statusCode := rr.statusCode; statusCode >= 200 && statusCode < 400 {
+			mutex.Lock()
+			successfulRequests.Inc()
+			mutex.Unlock()
+		} else {
+			mutex.Lock()
+			failedRequests.Inc()
+			mutex.Unlock()
+		}
 
-			// Update request rate
-			updateRequestRate(method, endpoint)
-		}()
-
-		// Return immediately without waiting for the Goroutine to finish
-		// This allows the middleware to handle concurrent requests
-		return
+		// Update request rate
+		updateRequestRate(method, endpoint)
 	}
 }
 

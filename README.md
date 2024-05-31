@@ -88,3 +88,28 @@ Briše konfiguracije sa određenim labelama iz grupe.
 **Endpoint:** `/config-groups/{name}/{version}/{configName}/{configVersion}`
 
 Briše konfiguraciju iz grupe.
+
+### Metrike:
+
+1. **Ukupan broj zahteva za prethodna 24 sata**
+   - Metrika: `ars2024_project_total_requests`
+
+2. **Broj uspešnih zahteva (status kodova odgovora 2xx, 3xx) za prethodna 24 sata**
+   - Metrika: `ars2024_project_successful_requests`
+
+3. **Broj neuspešnih zahteva (status kodova odgovora 4xx, 5xx) za prethodna 24 sata**
+   - Metrika: `ars2024_project_failed_requests`
+
+4. **Prosečno vreme izvršavanja zahteva za svaki endpoint**
+   - Izraz:
+     ```plaintext
+     sum(rate(ars2024_project_request_duration_seconds_sum[24h])) / sum(rate(ars2024_project_request_duration_seconds_count[24h]))
+     ```
+     Ovaj izraz računa prosečno vreme izvršavanja zahteva za svaki endpoint tokom poslednjih 24 sata.
+
+5. **Broj zahteva u jedinici vremena (minut) za svaki endpoint za prethodna 24 sata**
+   - Izraz:
+     ```plaintext
+     sum(rate(ars2024_project_total_requests{endpoint="/config-groups/{name}/{version}"}[24h])) / 24 / 60
+     ```
+     Ovaj izraz računa broj zahteva po minutu za određeni endpoint `/config-groups/{name}/{version}` tokom prethodnih 24 sata.
