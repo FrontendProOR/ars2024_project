@@ -131,11 +131,15 @@ func (h *ConfigGroupHandler) AddConfigWithLabelToGroup(w http.ResponseWriter, r 
 // Removes configurations with labels from a group
 func (h *ConfigGroupHandler) RemoveConfigsWithLabelsFromGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
-	groupVersion := mux.Vars(r)["version"]
+	version := mux.Vars(r)["version"]
 
-	labelsParam := r.URL.Query().Get("labels")
+	vars := mux.Vars(r)
+	labelsParam := vars["labels"]
 
 	labelPairs := strings.Split(labelsParam, ";")
+
+	configName := mux.Vars(r)["configName"]
+	configVersion := mux.Vars(r)["configVersion"]
 
 	labels := make([]model.Label, 0, len(labelPairs))
 	for _, pair := range labelPairs {
@@ -150,7 +154,7 @@ func (h *ConfigGroupHandler) RemoveConfigsWithLabelsFromGroup(w http.ResponseWri
 		labels = append(labels, model.Label{Key: parts[0], Value: parts[1]})
 	}
 
-	if err := h.repo.RemoveConfigsWithLabelsFromGroup(groupName, groupVersion, labels); err != nil {
+	if err := h.repo.RemoveConfigsWithLabelsFromGroup(groupName, version, labels, configName, configVersion); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -164,9 +168,13 @@ func (h *ConfigGroupHandler) SearchConfigsWithLabelsInGroup(w http.ResponseWrite
 	groupName := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
 
-	labelsParam := r.URL.Query().Get("labels")
+	vars := mux.Vars(r)
+	labelsParam := vars["labels"]
 
 	labelPairs := strings.Split(labelsParam, ";")
+
+	configName := mux.Vars(r)["configName"]
+	configVersion := mux.Vars(r)["configVersion"]
 
 	searchLabels := make([]model.Label, 0, len(labelPairs))
 	for _, pair := range labelPairs {
@@ -181,7 +189,7 @@ func (h *ConfigGroupHandler) SearchConfigsWithLabelsInGroup(w http.ResponseWrite
 		searchLabels = append(searchLabels, model.Label{Key: parts[0], Value: parts[1]})
 	}
 
-	configs, err := h.repo.SearchConfigsWithLabelsInGroup(groupName, version, searchLabels)
+	configs, err := h.repo.SearchConfigsWithLabelsInGroup(groupName, version, searchLabels, configName, configVersion)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -42,10 +42,10 @@ func (s ConfigGroupService) AddConfigWithLabelToGroup(groupName string, version 
 	return s.repo.AddConfigWithLabelToGroup(groupName, version, config)
 }
 
-func (s ConfigGroupService) RemoveConfigsWithLabelsFromGroup(groupName string, version string, labels []model.Label) error {
-	return s.repo.RemoveConfigsWithLabelsFromGroup(groupName, version, labels)
+func (s ConfigGroupService) SearchConfigsWithLabelsInGroup(groupName string, version string, labels []model.Label, configName string, configVersion string) ([]*model.ConfigWithLabels, error) {
+	return s.repo.SearchConfigsWithLabelsInGroup(groupName, version, labels, configName, configVersion)
 }
 
-func (s ConfigGroupService) SearchConfigsWithLabelsInGroup(groupName string, version string, labels []model.Label) ([]*model.ConfigWithLabels, error) {
-	return s.repo.SearchConfigsWithLabelsInGroup(groupName, version, labels)
+func (s ConfigGroupService) RemoveConfigsWithLabelsFromGroup(groupName string, version string, labels []model.Label, configName string, configVersion string) error {
+	return s.repo.RemoveConfigsWithLabelsFromGroup(groupName, version, labels, configName, configVersion)
 }
