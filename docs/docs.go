@@ -34,13 +34,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config-group"
+                    "config-groups"
                 ],
                 "summary": "Add a new configuration group",
                 "parameters": [
                     {
-                        "description": "Configuration group object to add",
-                        "name": "body",
+                        "description": "Config Group",
+                        "name": "group",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -50,13 +50,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Configuration group successfully added",
+                        "description": "Config group successfully added",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Invalid request",
                         "schema": {
                             "type": "string"
                         }
@@ -72,7 +72,7 @@ const docTemplate = `{
         },
         "/config-groups/{name}/{version}": {
             "get": {
-                "description": "Get a configuration group by name and version",
+                "description": "Get a configuration group",
                 "consumes": [
                     "application/json"
                 ],
@@ -80,20 +80,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config-group"
+                    "config-groups"
                 ],
-                "summary": "Get a configuration group by name and version",
+                "summary": "Get a configuration group",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Configuration group name",
+                        "description": "Config Group Name",
                         "name": "name",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Configuration group version",
+                        "description": "Config Group Version",
                         "name": "version",
                         "in": "path",
                         "required": true
@@ -107,7 +107,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Configuration group not found",
+                        "description": "Config group not found",
                         "schema": {
                             "type": "string"
                         }
@@ -121,22 +121,28 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Remove a configuration group by name and version",
-                "tags": [
-                    "config-group"
+                "description": "Remove a configuration group",
+                "consumes": [
+                    "application/json"
                 ],
-                "summary": "Remove a configuration group by name and version",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config-groups"
+                ],
+                "summary": "Remove a configuration group",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Configuration group name",
+                        "description": "Config Group Name",
                         "name": "name",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Configuration group version",
+                        "description": "Config Group Version",
                         "name": "version",
                         "in": "path",
                         "required": true
@@ -144,19 +150,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Configuration group successfully removed",
+                        "description": "Config group successfully removed",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "404": {
-                        "description": "Configuration group not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
+                        "description": "Config group not found",
                         "schema": {
                             "type": "string"
                         }
@@ -174,27 +174,27 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config-group"
+                    "config-groups"
                 ],
                 "summary": "Add a configuration with labels to a group",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Configuration group name",
+                        "description": "Config Group Name",
                         "name": "name",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Configuration group version",
+                        "description": "Config Group Version",
                         "name": "version",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Configuration with labels object to add to group",
-                        "name": "body",
+                        "description": "Config with Labels",
+                        "name": "config",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -204,13 +204,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Configuration with label successfully added to group",
+                        "description": "Config with label successfully added to group",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Invalid request",
                         "schema": {
                             "type": "string"
                         }
@@ -224,65 +224,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/config-groups/{name}/{version}/configs/delete": {
+        "/config-groups/{name}/{version}/configs/{configName}/{configVersion}": {
             "delete": {
-                "description": "Remove configurations with labels from a group",
-                "tags": [
-                    "config-group"
-                ],
-                "summary": "Remove configurations with labels from a group",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Configuration group name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Configuration group version",
-                        "name": "version",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Labels to match in key:value format (e.g., label1:value1;label2:value2)",
-                        "name": "labels",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Configurations with labels successfully removed from group",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/config-groups/{name}/{version}/configs/search": {
-            "get": {
-                "description": "Search configurations with labels in a group",
+                "description": "Remove a configuration from a group",
                 "consumes": [
                     "application/json"
                 ],
@@ -290,33 +234,102 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config-group"
+                    "config-groups"
                 ],
-                "summary": "Search configurations with labels in a group",
+                "summary": "Remove a configuration from a group",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Configuration group name",
+                        "description": "Config Group Name",
                         "name": "name",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Configuration group version",
+                        "description": "Config Group Version",
                         "name": "version",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "type": "array",
-                        "items": {
+                        "type": "string",
+                        "description": "Config Name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Config Version",
+                        "name": "configVersion",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Config successfully removed from group",
+                        "schema": {
                             "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Labels to match in key:value format (e.g., label1:value1;label2:value2)",
+                        }
+                    },
+                    "404": {
+                        "description": "Config group not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/config-groups/{name}/{version}/configs/{labels}/{configName}/{configVersion}": {
+            "get": {
+                "description": "Search for configurations with labels in a group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config-groups"
+                ],
+                "summary": "Search for configurations with labels in a group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config Group Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Config Group Version",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Labels (key:value;key:value)",
                         "name": "labels",
-                        "in": "query",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Config Name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Config Version",
+                        "name": "configVersion",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -326,12 +339,88 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Config"
+                                "$ref": "#/definitions/model.ConfigWithLabels"
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid label format",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "404": {
-                        "description": "No configurations found with specified labels",
+                        "description": "No configs with all labels found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove configurations with labels from a group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config-groups"
+                ],
+                "summary": "Remove configurations with labels from a group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config Group Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Config Group Version",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Labels (key:value;key:value)",
+                        "name": "labels",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Config Name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Config Version",
+                        "name": "configVersion",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Configs with labels successfully removed from group",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid label format",
                         "schema": {
                             "type": "string"
                         }
@@ -355,34 +444,34 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config-group"
+                    "config-groups"
                 ],
                 "summary": "Add a configuration to a group",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Configuration group name",
+                        "description": "Config Group Name",
                         "name": "name",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Configuration group version",
+                        "description": "Config Group Version",
                         "name": "version",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Configuration name",
+                        "description": "Config Name",
                         "name": "configName",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Configuration version",
+                        "description": "Config Version",
                         "name": "configVersion",
                         "in": "path",
                         "required": true
@@ -390,70 +479,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Configuration successfully added to group",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Remove a configuration from a group",
-                "tags": [
-                    "config-group"
-                ],
-                "summary": "Remove a configuration from a group",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Configuration group name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Configuration group version",
-                        "name": "version",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Configuration name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Configuration version",
-                        "name": "configVersion",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Configuration successfully removed from group",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Configuration not found in group",
+                        "description": "Config successfully added to group",
                         "schema": {
                             "type": "string"
                         }
@@ -610,6 +636,7 @@ const docTemplate = `{
     },
     "definitions": {
         "model.Config": {
+            "description": "A configuration entity with a name, version, and parameters",
             "type": "object",
             "properties": {
                 "name": {
@@ -627,6 +654,7 @@ const docTemplate = `{
             }
         },
         "model.ConfigGroup": {
+            "description": "A configuration group containing a list of ConfigWithLabels",
             "type": "object",
             "properties": {
                 "configs": {
@@ -644,6 +672,7 @@ const docTemplate = `{
             }
         },
         "model.ConfigWithLabels": {
+            "description": "A configuration with an additional Labels field",
             "type": "object",
             "properties": {
                 "labels": {
@@ -667,6 +696,7 @@ const docTemplate = `{
             }
         },
         "model.Label": {
+            "description": "A key-value pair representing a label",
             "type": "object",
             "properties": {
                 "key": {

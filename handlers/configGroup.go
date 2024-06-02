@@ -1,3 +1,5 @@
+// The above code defines a set of HTTP handlers for managing configuration groups and configurations
+// with labels in a Go application.
 package handlers
 
 import (
@@ -20,15 +22,15 @@ func NewConfigGroupHandler(repo services.ConfigGroupService) *ConfigGroupHandler
 	}
 }
 
-// Add a configuration group
+// AddGroup adds a new configuration group
 // @Summary Add a new configuration group
 // @Description Add a new configuration group
-// @Tags config-group
-// @Accept json
-// @Produce json
-// @Param body body model.ConfigGroup true "Configuration group object to add"
-// @Success 201 {string} string "Configuration group successfully added"
-// @Failure 400 {string} string "Bad request"
+// @Tags config-groups
+// @Accept  json
+// @Produce  json
+// @Param group body model.ConfigGroup true "Config Group"
+// @Success 201 {string} string "Config group successfully added"
+// @Failure 400 {string} string "Invalid request"
 // @Failure 500 {string} string "Internal server error"
 // @Router /config-groups [post]
 func (h *ConfigGroupHandler) AddGroup(w http.ResponseWriter, r *http.Request) {
@@ -47,16 +49,16 @@ func (h *ConfigGroupHandler) AddGroup(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Config group successfully added"))
 }
 
-// Get a configuration group by name and version
-// @Summary Get a configuration group by name and version
-// @Description Get a configuration group by name and version
-// @Tags config-group
-// @Accept json
-// @Produce json
-// @Param name path string true "Configuration group name"
-// @Param version path string true "Configuration group version"
+// GetGroup retrieves a configuration group
+// @Summary Get a configuration group
+// @Description Get a configuration group
+// @Tags config-groups
+// @Accept  json
+// @Produce  json
+// @Param name path string true "Config Group Name"
+// @Param version path string true "Config Group Version"
 // @Success 200 {object} model.ConfigGroup
-// @Failure 404 {string} string "Configuration group not found"
+// @Failure 404 {string} string "Config group not found"
 // @Failure 500 {string} string "Internal server error"
 // @Router /config-groups/{name}/{version} [get]
 func (h *ConfigGroupHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
@@ -79,15 +81,16 @@ func (h *ConfigGroupHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-// Remove a configuration group by name and version
-// @Summary Remove a configuration group by name and version
-// @Description Remove a configuration group by name and version
-// @Tags config-group
-// @Param name path string true "Configuration group name"
-// @Param version path string true "Configuration group version"
-// @Success 200 {string} string "Configuration group successfully removed"
-// @Failure 404 {string} string "Configuration group not found"
-// @Failure 500 {string} string "Internal server error"
+// RemoveGroup removes a configuration group
+// @Summary Remove a configuration group
+// @Description Remove a configuration group
+// @Tags config-groups
+// @Accept  json
+// @Produce  json
+// @Param name path string true "Config Group Name"
+// @Param version path string true "Config Group Version"
+// @Success 200 {string} string "Config group successfully removed"
+// @Failure 404 {string} string "Config group not found"
 // @Router /config-groups/{name}/{version} [delete]
 func (h *ConfigGroupHandler) RemoveGroup(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
@@ -102,18 +105,17 @@ func (h *ConfigGroupHandler) RemoveGroup(w http.ResponseWriter, r *http.Request)
 	w.Write([]byte("Config group successfully removed"))
 }
 
-// Add a configuration to a group
+// AddConfigToGroup adds a configuration to a group
 // @Summary Add a configuration to a group
 // @Description Add a configuration to a group
-// @Tags config-group
-// @Accept json
-// @Produce json
-// @Param name path string true "Configuration group name"
-// @Param version path string true "Configuration group version"
-// @Param configName path string true "Configuration name"
-// @Param configVersion path string true "Configuration version"
-// @Success 201 {string} string "Configuration successfully added to group"
-// @Failure 400 {string} string "Bad request"
+// @Tags config-groups
+// @Accept  json
+// @Produce  json
+// @Param name path string true "Config Group Name"
+// @Param version path string true "Config Group Version"
+// @Param configName path string true "Config Name"
+// @Param configVersion path string true "Config Version"
+// @Success 201 {string} string "Config successfully added to group"
 // @Failure 500 {string} string "Internal server error"
 // @Router /config-groups/{name}/{version}/{configName}/{configVersion} [post]
 func (h *ConfigGroupHandler) AddConfigToGroup(w http.ResponseWriter, r *http.Request) {
@@ -132,18 +134,19 @@ func (h *ConfigGroupHandler) AddConfigToGroup(w http.ResponseWriter, r *http.Req
 	w.Write([]byte("Config successfully added to group"))
 }
 
-// Remove a configuration from a group
+// RemoveConfigFromGroup removes a configuration from a group
 // @Summary Remove a configuration from a group
 // @Description Remove a configuration from a group
-// @Tags config-group
-// @Param name path string true "Configuration group name"
-// @Param version path string true "Configuration group version"
-// @Param configName path string true "Configuration name"
-// @Param configVersion path string true "Configuration version"
-// @Success 200 {string} string "Configuration successfully removed from group"
-// @Failure 404 {string} string "Configuration not found in group"
-// @Failure 500 {string} string "Internal server error"
-// @Router /config-groups/{name}/{version}/{configName}/{configVersion} [delete]
+// @Tags config-groups
+// @Accept  json
+// @Produce  json
+// @Param name path string true "Config Group Name"
+// @Param version path string true "Config Group Version"
+// @Param configName path string true "Config Name"
+// @Param configVersion path string true "Config Version"
+// @Success 200 {string} string "Config successfully removed from group"
+// @Failure 404 {string} string "Config group not found"
+// @Router /config-groups/{name}/{version}/configs/{configName}/{configVersion} [delete]
 func (h *ConfigGroupHandler) RemoveConfigFromGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
 	groupVersion := mux.Vars(r)["version"]
@@ -160,17 +163,17 @@ func (h *ConfigGroupHandler) RemoveConfigFromGroup(w http.ResponseWriter, r *htt
 	w.Write([]byte("Config successfully removed from group"))
 }
 
-// Add a configuration with labels to a group
+// AddConfigWithLabelToGroup adds a configuration with labels to a group
 // @Summary Add a configuration with labels to a group
 // @Description Add a configuration with labels to a group
-// @Tags config-group
-// @Accept json
-// @Produce json
-// @Param name path string true "Configuration group name"
-// @Param version path string true "Configuration group version"
-// @Param body body model.ConfigWithLabels true "Configuration with labels object to add to group"
-// @Success 201 {string} string "Configuration with label successfully added to group"
-// @Failure 400 {string} string "Bad request"
+// @Tags config-groups
+// @Accept  json
+// @Produce  json
+// @Param name path string true "Config Group Name"
+// @Param version path string true "Config Group Version"
+// @Param config body model.ConfigWithLabels true "Config with Labels"
+// @Success 201 {string} string "Config with label successfully added to group"
+// @Failure 400 {string} string "Invalid request"
 // @Failure 500 {string} string "Internal server error"
 // @Router /config-groups/{name}/{version}/configs [post]
 func (h *ConfigGroupHandler) AddConfigWithLabelToGroup(w http.ResponseWriter, r *http.Request) {
@@ -192,24 +195,32 @@ func (h *ConfigGroupHandler) AddConfigWithLabelToGroup(w http.ResponseWriter, r 
 	w.Write([]byte("Config with label successfully added to group"))
 }
 
-// Remove configurations with labels from a group
+// RemoveConfigsWithLabelsFromGroup removes configurations with labels from a group
 // @Summary Remove configurations with labels from a group
 // @Description Remove configurations with labels from a group
-// @Tags config-group
-// @Param name path string true "Configuration group name"
-// @Param version path string true "Configuration group version"
-// @Param labels query []string true "Labels to match in key:value format (e.g., label1:value1;label2:value2)"
-// @Success 200 {string} string "Configurations with labels successfully removed from group"
-// @Failure 400 {string} string "Bad request"
+// @Tags config-groups
+// @Accept  json
+// @Produce  json
+// @Param name path string true "Config Group Name"
+// @Param version path string true "Config Group Version"
+// @Param labels path string true "Labels (key:value;key:value)"
+// @Param configName path string true "Config Name"
+// @Param configVersion path string true "Config Version"
+// @Success 200 {string} string "Configs with labels successfully removed from group"
+// @Failure 400 {string} string "Invalid label format"
 // @Failure 500 {string} string "Internal server error"
-// @Router /config-groups/{name}/{version}/configs/delete [delete]
+// @Router /config-groups/{name}/{version}/configs/{labels}/{configName}/{configVersion} [delete]
 func (h *ConfigGroupHandler) RemoveConfigsWithLabelsFromGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
-	groupVersion := mux.Vars(r)["version"]
+	version := mux.Vars(r)["version"]
 
-	labelsParam := r.URL.Query().Get("labels")
+	vars := mux.Vars(r)
+	labelsParam := vars["labels"]
 
 	labelPairs := strings.Split(labelsParam, ";")
+
+	configName := mux.Vars(r)["configName"]
+	configVersion := mux.Vars(r)["configVersion"]
 
 	labels := make([]model.Label, 0, len(labelPairs))
 	for _, pair := range labelPairs {
@@ -224,7 +235,7 @@ func (h *ConfigGroupHandler) RemoveConfigsWithLabelsFromGroup(w http.ResponseWri
 		labels = append(labels, model.Label{Key: parts[0], Value: parts[1]})
 	}
 
-	if err := h.repo.RemoveConfigsWithLabelsFromGroup(groupName, groupVersion, labels); err != nil {
+	if err := h.repo.RemoveConfigsWithLabelsFromGroup(groupName, version, labels, configName, configVersion); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -233,26 +244,33 @@ func (h *ConfigGroupHandler) RemoveConfigsWithLabelsFromGroup(w http.ResponseWri
 	w.Write([]byte("Configs with labels successfully removed from group"))
 }
 
-// Search configurations with labels in a group
-// @Summary Search configurations with labels in a group
-// @Description Search configurations with labels in a group
-// @Tags config-group
-// @Accept json
-// @Produce json
-// @Param name path string true "Configuration group name"
-// @Param version path string true "Configuration group version"
-// @Param labels query []string true "Labels to match in key:value format (e.g., label1:value1;label2:value2)"
-// @Success 200 {object} []model.Config
-// @Failure 404 {string} string "No configurations found with specified labels"
+// SearchConfigsWithLabelsInGroup searches for configurations with labels in a group
+// @Summary Search for configurations with labels in a group
+// @Description Search for configurations with labels in a group
+// @Tags config-groups
+// @Accept  json
+// @Produce  json
+// @Param name path string true "Config Group Name"
+// @Param version path string true "Config Group Version"
+// @Param labels path string true "Labels (key:value;key:value)"
+// @Param configName path string true "Config Name"
+// @Param configVersion path string true "Config Version"
+// @Success 200 {array} model.ConfigWithLabels
+// @Failure 400 {string} string "Invalid label format"
+// @Failure 404 {string} string "No configs with all labels found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /config-groups/{name}/{version}/configs/search [get]
+// @Router /config-groups/{name}/{version}/configs/{labels}/{configName}/{configVersion} [get]
 func (h *ConfigGroupHandler) SearchConfigsWithLabelsInGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
 
-	labelsParam := r.URL.Query().Get("labels")
+	vars := mux.Vars(r)
+	labelsParam := vars["labels"]
 
 	labelPairs := strings.Split(labelsParam, ";")
+
+	configName := mux.Vars(r)["configName"]
+	configVersion := mux.Vars(r)["configVersion"]
 
 	searchLabels := make([]model.Label, 0, len(labelPairs))
 	for _, pair := range labelPairs {
@@ -267,7 +285,7 @@ func (h *ConfigGroupHandler) SearchConfigsWithLabelsInGroup(w http.ResponseWrite
 		searchLabels = append(searchLabels, model.Label{Key: parts[0], Value: parts[1]})
 	}
 
-	configs, err := h.repo.SearchConfigsWithLabelsInGroup(groupName, version, searchLabels)
+	configs, err := h.repo.SearchConfigsWithLabelsInGroup(groupName, version, searchLabels, configName, configVersion)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
