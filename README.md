@@ -7,6 +7,7 @@ Ova dokumentacija opisuje rute i operacije dostupne u našem API-ju za manipulac
 - **Swagger dokumentacija:** [http://localhost:8000/swagger/index.html](http://localhost:8000/swagger/index.html)
 - **Consul port:** [http://localhost:8500](http://localhost:8500)
 - **Port aplikacije:** [http://localhost:8000](http://localhost:8000)
+- **Metrike: **[http://localhost:9090](http://localhost:9090)
 
 ## Konfiguracije
 
@@ -64,28 +65,28 @@ Dodaje konfiguraciju u određenu grupu.
 ### Pretraga konfiguracija sa labelama u grupi
 
 **Metoda:** GET  
-**Endpoint:** `/config-groups/{name}/{version}/config/search`
+**Endpoint:** `/config-groups/{name}/{version}/configs/{labels}/{configName}/{configVersion}`
 
 Pretražuje konfiguracije u grupi na osnovu labela.
 
 ### Dodavanje konfiguracije sa labelom u grupu
 
 **Metoda:** POST  
-**Endpoint:** `/config-groups/{name}/{version}/config`
+**Endpoint:** `/config-groups/{name}/{version}/configs`
 
 Dodaje konfiguraciju u grupu sa određenim labelom.
 
 ### Brisanje konfiguracija sa labelama iz grupe
 
 **Metoda:** DELETE  
-**Endpoint:** `/config-groups/{name}/{version}/config/delete`
+**Endpoint:** `/config-groups/{name}/{version}/configs/{labels}/{configName}/{configVersion}`
 
 Briše konfiguracije sa određenim labelama iz grupe.
 
 ### Brisanje konfiguracije iz grupe
 
 **Metoda:** DELETE  
-**Endpoint:** `/config-groups/{name}/{version}/{configName}/{configVersion}`
+**Endpoint:** `/config-groups/{name}/{version}/configs/{configName}/{configVersion}`
 
 Briše konfiguraciju iz grupe.
 
