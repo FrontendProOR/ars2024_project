@@ -1,5 +1,3 @@
-// The code defines a ConfigHandler struct with methods for adding, retrieving, and deleting
-// configurations using a ConfigService.
 package handlers
 
 import (
@@ -21,7 +19,17 @@ func NewConfigHandler(service services.ConfigService) *ConfigHandler {
 	}
 }
 
-// Adds a new configuration
+// Add a new config
+// @Summary Add a new config
+// @Description Add a new config
+// @Tags config
+// @Accept json
+// @Produce json
+// @Param body body model.Config true "Config object to add"
+// @Success 201 {string} string "Config successfully added"
+// @Failure 400 {string} string "Bad request"
+// @Failure 500 {string} string "Internal server error"
+// @Router /configs [post]
 func (c ConfigHandler) Add(w http.ResponseWriter, r *http.Request) {
 	var config model.Config
 	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
@@ -38,7 +46,18 @@ func (c ConfigHandler) Add(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Config successfully added"))
 }
 
-// Retrieves a configuration
+// Get a config by name and version
+// @Summary Get a config by name and version
+// @Description Get a config by name and version
+// @Tags config
+// @Accept json
+// @Produce json
+// @Param name path string true "Config name"
+// @Param version path string true "Config version"
+// @Success 200 {object} model.Config
+// @Failure 404 {string} string "Config not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /configs/{name}/{version} [get]
 func (c ConfigHandler) Get(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]
@@ -59,7 +78,16 @@ func (c ConfigHandler) Get(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-// Deletes a configuration
+// Delete a config by name and version
+// @Summary Delete a config by name and version
+// @Description Delete a config by name and version
+// @Tags config
+// @Param name path string true "Config name"
+// @Param version path string true "Config version"
+// @Success 200 {string} string "Config successfully deleted"
+// @Failure 404 {string} string "Config not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /configs/{name}/{version} [delete]
 func (c ConfigHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	version := mux.Vars(r)["version"]

@@ -1,5 +1,3 @@
-// The `RunServer` function starts an HTTP server with a given router and handles graceful shutdown on
-// receiving SIGINT or SIGTERM signals.
 package api
 
 import (
@@ -17,6 +15,9 @@ func RunServer(router http.Handler) {
 		Addr:    "0.0.0.0:8000",
 		Handler: router,
 	}
+
+	log.Println("Server started on http://localhost:8000")
+	log.Println("Swagger UI available at http://localhost:8000/swagger/index.html")
 
 	// Start the server in a goroutine
 	go func() {

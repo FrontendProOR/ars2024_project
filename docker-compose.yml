@@ -1,23 +1,44 @@
-#This is a Docker Compose configuration file. It is used to define and run multi-container Docker applications.
-version: '4.3'
+version: '3'
 
 services:
   ars2024project:
     image: ars2024project
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile-multistage
     ports:
       - 8000:8000
     depends_on:
       - consul
     environment:
       - CONSUL_HTTP_ADDR=consul:8500
+    
 
   consul:
     image: consul:1.15.4
     command: agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
     ports:
       - 8500:8500
+      - 8600:8600/tcp
+      - 8600:8600/udp
     volumes:
       - /consul_data:/consul/data
+    
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  prometheus_data:
+  grafana_data:
